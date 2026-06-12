@@ -1,2318 +1,1150 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mr. Ilyas Abdi Ali — Web Developer & Designer</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mr. Ilyas Abdi Ali — Web Developer & Designer</title>
+  <meta name="description" content="Portfolio of Mr. Ilyas Abdi Ali — Web Developer & Designer" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <style>
+    /* ===== RESET ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      transition: background 0.5s ease, color 0.5s ease;
+      overflow-x: hidden;
+    }
+    a { text-decoration: none; color: inherit; }
+    img { max-width: 100%; display: block; }
+    ul { list-style: none; }
 
-    <!-- ===== Google Fonts ===== -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    /* ===== THEME VARIABLES ===== */
+    :root {
+      --bg: #0a0a0f;
+      --bg2: #12121a;
+      --text: #f0f0f5;
+      --text2: #a0a0b8;
+      --primary: #6c5ce7;
+      --primary2: #a78bfa;
+      --accent: #06d6a0;
+      --glass: rgba(255, 255, 255, 0.05);
+      --glass2: rgba(255, 255, 255, 0.08);
+      --border: rgba(255, 255, 255, 0.08);
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      --radius: 1rem;
+      --gradient: linear-gradient(135deg, #6c5ce7, #a78bfa, #06d6a0);
+      --gradient2: linear-gradient(135deg, #6c5ce7, #06d6a0);
+      --nav-bg: rgba(10, 10, 15, 0.85);
+    }
+    .light {
+      --bg: #f8f9fc;
+      --bg2: #ffffff;
+      --text: #1a1a2e;
+      --text2: #6b7280;
+      --primary: #6c5ce7;
+      --primary2: #8b5cf6;
+      --accent: #059669;
+      --glass: rgba(255, 255, 255, 0.6);
+      --glass2: rgba(255, 255, 255, 0.8);
+      --border: rgba(0, 0, 0, 0.08);
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+      --nav-bg: rgba(248, 249, 252, 0.9);
+    }
 
-    <!-- ===== Font Awesome ===== -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    /* ===== LOADING SCREEN ===== */
+    #loadingScreen {
+      position: fixed; inset: 0; z-index: 99999;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: var(--bg); transition: opacity 0.6s ease, visibility 0.6s ease;
+    }
+    #loadingScreen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    .loader {
+      width: 50px; height: 50px; border-radius: 50%;
+      border: 3px solid var(--border); border-top-color: var(--primary);
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loader-text { margin-top: 1rem; color: var(--text2); font-size: 0.9rem; letter-spacing: 2px; }
 
-    <style>
-        /* ============================================================
-                   CSS VARIABLES — LIGHT & DARK THEMES
-                   ============================================================ */
-        :root {
-            --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            --font-display: 'Space Grotesk', 'Inter', sans-serif;
+    /* ===== AUTH PAGES ===== */
+    .auth-overlay {
+      position: fixed; inset: 0; z-index: 9999;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--bg); padding: 1rem;
+    }
+    .auth-overlay.hidden { display: none; }
+    .auth-card {
+      width: 100%; max-width: 420px; padding: 2.5rem 2rem;
+      background: var(--glass); backdrop-filter: blur(20px);
+      border: 1px solid var(--border); border-radius: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+    .auth-card h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.75rem; margin-bottom: 0.25rem;
+    }
+    .auth-card p.sub {
+      color: var(--text2); font-size: 0.875rem; margin-bottom: 1.5rem;
+    }
+    .auth-card .logo {
+      font-family: 'Space Grotesk', sans-serif; font-size: 1.25rem; font-weight: 700;
+      background: var(--gradient); -webkit-background-clip: text; background-clip: text;
+      color: transparent; margin-bottom: 1.5rem;
+    }
+    .auth-tabs {
+      display: flex; gap: 0.5rem; margin-bottom: 1.5rem;
+      background: var(--glass2); padding: 0.25rem; border-radius: 0.75rem;
+    }
+    .auth-tab {
+      flex: 1; padding: 0.5rem; text-align: center; border-radius: 0.5rem;
+      cursor: pointer; font-size: 0.875rem; font-weight: 500; color: var(--text2);
+      transition: all 0.3s; border: none; background: none;
+    }
+    .auth-tab.active { background: var(--primary); color: #fff; }
+    .auth-form { display: none; flex-direction: column; gap: 1rem; }
+    .auth-form.active { display: flex; }
+    .auth-form input {
+      width: 100%; padding: 0.75rem 1rem; border-radius: 0.75rem;
+      border: 1px solid var(--border); background: var(--glass2);
+      color: var(--text); font-size: 0.9rem; outline: none;
+      transition: border-color 0.3s;
+    }
+    .auth-form input:focus { border-color: var(--primary); }
+    .auth-form input::placeholder { color: var(--text2); }
+    .auth-form .btn-primary {
+      width: 100%; padding: 0.75rem; border-radius: 0.75rem;
+      background: var(--gradient2); color: #fff; font-weight: 600;
+      border: none; cursor: pointer; font-size: 0.9rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .auth-form .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(108,92,231,0.3); }
+    .auth-form .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .divider { display: flex; align-items: center; gap: 1rem; color: var(--text2); font-size: 0.8rem; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .google-btn {
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      width: 100%; padding: 0.75rem; border-radius: 0.75rem;
+      border: 1px solid var(--border); background: var(--glass2);
+      color: var(--text); font-size: 0.9rem; font-weight: 500;
+      cursor: pointer; transition: background 0.3s;
+    }
+    .google-btn:hover { background: var(--glass); }
+    .google-btn svg { width: 18px; height: 18px; }
+    .auth-link {
+      text-align: center; font-size: 0.85rem; color: var(--text2);
+    }
+    .auth-link span { color: var(--primary); cursor: pointer; font-weight: 500; }
+    .auth-link span:hover { text-decoration: underline; }
+    .forgot-link { text-align: right; font-size: 0.8rem; color: var(--primary); cursor: pointer; }
+    .forgot-link:hover { text-decoration: underline; }
+    .error-msg { color: #ef4444; font-size: 0.8rem; text-align: center; }
+    .success-msg { color: #10b981; font-size: 0.8rem; text-align: center; }
 
-            --bg-primary: #f0f2f5;
-            --bg-secondary: rgba(255, 255, 255, 0.6);
-            --bg-glass: rgba(255, 255, 255, 0.25);
-            --bg-glass-hover: rgba(255, 255, 255, 0.35);
-            --text-primary: #1a1a2e;
-            --text-secondary: #4a4a6a;
-            --text-muted: #8888a0;
-            --accent: #6c63ff;
-            --accent-hover: #5a52e0;
-            --accent-soft: rgba(108, 99, 255, 0.12);
-            --border-glass: rgba(255, 255, 255, 0.4);
-            --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.08);
-            --shadow-hover: 0 12px 48px rgba(0, 0, 0, 0.12);
-            --input-bg: rgba(255, 255, 255, 0.5);
-            --input-border: rgba(0, 0, 0, 0.1);
-            --card-bg: rgba(255, 255, 255, 0.55);
-            --success: #10b981;
-            --error: #ef4444;
-            --warning: #f59e0b;
-            --toast-bg: rgba(255, 255, 255, 0.9);
-            --toast-text: #1a1a2e;
-            --overlay: rgba(0, 0, 0, 0.4);
-            --nav-bg: rgba(255, 255, 255, 0.6);
-            --progress-bg: rgba(0, 0, 0, 0.08);
-            --footer-bg: rgba(255, 255, 255, 0.35);
-            --gradient-1: #6c63ff;
-            --gradient-2: #e040fb;
-            --gradient-3: #00e5ff;
-            --card-border: rgba(255, 255, 255, 0.5);
-            --tag-bg: rgba(108, 99, 255, 0.1);
-            --tag-color: var(--accent);
-            transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
-        }
+    /* ===== MAIN WEBSITE ===== */
+    #mainSite { display: none; }
+    #mainSite.active { display: block; }
 
-        [data-theme="dark"] {
-            --bg-primary: #0a0a14;
-            --bg-secondary: rgba(18, 18, 36, 0.7);
-            --bg-glass: rgba(24, 24, 48, 0.5);
-            --bg-glass-hover: rgba(34, 34, 64, 0.6);
-            --text-primary: #e8e8f0;
-            --text-secondary: #b0b0c8;
-            --text-muted: #6a6a88;
-            --accent: #8b83ff;
-            --accent-hover: #a099ff;
-            --accent-soft: rgba(139, 131, 255, 0.15);
-            --border-glass: rgba(255, 255, 255, 0.06);
-            --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.4);
-            --shadow-hover: 0 12px 48px rgba(0, 0, 0, 0.5);
-            --input-bg: rgba(24, 24, 48, 0.5);
-            --input-border: rgba(255, 255, 255, 0.06);
-            --card-bg: rgba(24, 24, 48, 0.55);
-            --toast-bg: rgba(24, 24, 48, 0.92);
-            --toast-text: #e8e8f0;
-            --overlay: rgba(0, 0, 0, 0.7);
-            --nav-bg: rgba(10, 10, 20, 0.7);
-            --progress-bg: rgba(255, 255, 255, 0.06);
-            --footer-bg: rgba(10, 10, 20, 0.5);
-            --card-border: rgba(255, 255, 255, 0.06);
-            --tag-bg: rgba(139, 131, 255, 0.12);
-            --tag-color: var(--accent);
-        }
+    /* NAVIGATION */
+    nav {
+      position: fixed; top: 1rem; left: 50%; transform: translateX(-50%);
+      z-index: 1000; width: calc(100% - 2rem); max-width: 1100px;
+      padding: 0.75rem 1.5rem; border-radius: 1rem;
+      background: var(--nav-bg); backdrop-filter: blur(20px);
+      border: 1px solid var(--border); box-shadow: var(--shadow);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.1rem; }
+    .nav-logo span { background: var(--gradient); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .nav-links { display: flex; gap: 0.25rem; }
+    .nav-links a {
+      padding: 0.4rem 0.9rem; border-radius: 0.5rem; font-size: 0.85rem;
+      font-weight: 500; color: var(--text2); transition: all 0.3s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--text); background: var(--glass2); }
+    .nav-right { display: flex; align-items: center; gap: 0.75rem; }
+    .theme-btn {
+      width: 2.25rem; height: 2.25rem; border-radius: 0.5rem;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--glass2); border: 1px solid var(--border);
+      color: var(--text2); cursor: pointer; transition: all 0.3s;
+      font-size: 1rem;
+    }
+    .theme-btn:hover { color: var(--text); background: var(--glass); }
+    .user-avatar {
+      width: 2.25rem; height: 2.25rem; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 600; font-size: 0.8rem;
+      background: var(--gradient); color: #fff; cursor: pointer;
+      overflow: hidden; position: relative;
+    }
+    .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .user-dropdown {
+      position: absolute; top: calc(100% + 0.5rem); right: 0;
+      background: var(--glass); backdrop-filter: blur(20px);
+      border: 1px solid var(--border); border-radius: 0.75rem;
+      padding: 0.75rem; min-width: 200px; box-shadow: var(--shadow);
+      display: none; z-index: 100;
+    }
+    .user-dropdown.show { display: block; }
+    .user-dropdown .user-info { padding-bottom: 0.5rem; margin-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+    .user-dropdown .user-info p { font-size: 0.85rem; font-weight: 600; }
+    .user-dropdown .user-info span { font-size: 0.75rem; color: var(--text2); }
+    .user-dropdown .logout-btn {
+      width: 100%; padding: 0.5rem; border-radius: 0.5rem;
+      background: none; border: 1px solid var(--border); color: var(--text);
+      cursor: pointer; font-size: 0.85rem; text-align: center;
+      transition: background 0.3s;
+    }
+    .user-dropdown .logout-btn:hover { background: rgba(239,68,68,0.1); color: #ef4444; }
+    .hamburger { display: none; flex-direction: column; gap: 4px; cursor: pointer; background: none; border: none; padding: 4px; }
+    .hamburger span { width: 22px; height: 2px; background: var(--text); border-radius: 2px; transition: 0.3s; }
 
-        /* ============================================================
-                   RESET & BASE
-                   ============================================================ */
-        *,
-        *::before,
-        *::after {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    /* SECTIONS */
+    section { padding: 6rem 1.5rem; max-width: 1100px; margin: 0 auto; }
+    .section-tag {
+      display: inline-block; padding: 0.35rem 1rem; border-radius: 2rem;
+      background: rgba(108,92,231,0.1); color: var(--primary);
+      font-size: 0.8rem; font-weight: 600; margin-bottom: 1rem;
+      letter-spacing: 1px; text-transform: uppercase;
+    }
+    .section-title {
+      font-family: 'Space Grotesk', sans-serif; font-size: 2.5rem; font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .section-title em { background: var(--gradient); -webkit-background-clip: text; background-clip: text; color: transparent; font-style: normal; }
+    .section-desc { color: var(--text2); max-width: 600px; font-size: 1.05rem; line-height: 1.6; }
 
-        html {
-            scroll-behavior: smooth;
-            font-size: 16px;
-        }
+    /* HERO */
+    #home {
+      min-height: 100vh; display: flex; align-items: center;
+      padding-top: 8rem; position: relative; overflow: hidden;
+    }
+    .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.4rem 1rem; border-radius: 2rem;
+      background: rgba(6,214,160,0.1); color: var(--accent);
+      font-size: 0.85rem; font-weight: 500; margin-bottom: 1.5rem;
+    }
+    .hero-badge i { font-size: 0.7rem; }
+    .hero-title {
+      font-family: 'Space Grotesk', sans-serif; font-size: 3.5rem; font-weight: 700;
+      line-height: 1.1; margin-bottom: 1rem;
+    }
+    .hero-title span { background: var(--gradient); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .hero-text { color: var(--text2); font-size: 1.05rem; line-height: 1.7; margin-bottom: 2rem; max-width: 500px; }
+    .hero-buttons { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .btn-primary {
+      padding: 0.75rem 2rem; border-radius: 0.75rem;
+      background: var(--gradient2); color: #fff; font-weight: 600;
+      border: none; cursor: pointer; font-size: 0.9rem;
+      transition: transform 0.2s, box-shadow 0.2s; display: inline-flex; align-items: center; gap: 0.5rem;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(108,92,231,0.3); }
+    .btn-outline {
+      padding: 0.75rem 2rem; border-radius: 0.75rem;
+      border: 1px solid var(--border); color: var(--text);
+      font-weight: 500; cursor: pointer; font-size: 0.9rem;
+      transition: all 0.3s; display: inline-flex; align-items: center; gap: 0.5rem;
+      background: transparent;
+    }
+    .btn-outline:hover { background: var(--glass2); border-color: var(--primary); }
+    .hero-image {
+      position: relative; display: flex; justify-content: center; align-items: center;
+    }
+    .hero-image img {
+      width: 100%; max-width: 400px; border-radius: 2rem;
+      box-shadow: 0 20px 60px rgba(108,92,231,0.15);
+      position: relative; z-index: 2;
+    }
+    .hero-image::before {
+      content: ''; position: absolute; width: 120%; height: 120%;
+      background: radial-gradient(circle, rgba(108,92,231,0.15), transparent 70%);
+      top: -10%; left: -10%; z-index: 1;
+    }
+    .typing-cursor { animation: blink 0.8s infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
 
-        body {
-            font-family: var(--font-primary);
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.7;
-            min-height: 100vh;
-            overflow-x: hidden;
-            transition: background-color 0.4s ease, color 0.4s ease;
-        }
+    /* ABOUT */
+    #about .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+    .about-image { position: relative; }
+    .about-image img { width: 100%; max-width: 400px; border-radius: 2rem; margin: 0 auto; }
+    .about-image::after {
+      content: ''; position: absolute; width: 100%; height: 100%;
+      border: 2px solid var(--primary); border-radius: 2rem;
+      top: 1rem; left: 1rem; z-index: -1; opacity: 0.3;
+    }
+    .about-text p { color: var(--text2); line-height: 1.8; margin-bottom: 1rem; font-size: 0.95rem; }
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 2rem;
+    }
+    .stat-item {
+      text-align: center; padding: 1.5rem; border-radius: 1rem;
+      background: var(--glass); border: 1px solid var(--border);
+    }
+    .stat-item .num { font-family: 'Space Grotesk', sans-serif; font-size: 2rem; font-weight: 700; background: var(--gradient); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .stat-item .label { font-size: 0.8rem; color: var(--text2); margin-top: 0.25rem; }
 
-        ::-webkit-scrollbar {
-            width: 7px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: var(--accent);
-            border-radius: 10px;
-            opacity: 0.4;
-        }
+    /* SKILLS */
+    #skills .skills-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-top: 2rem; }
+    .skill-item { }
+    .skill-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem; }
+    .skill-header span:last-child { color: var(--primary); font-weight: 600; }
+    .skill-bar {
+      height: 8px; border-radius: 4px; background: var(--glass2);
+      overflow: hidden;
+    }
+    .skill-bar-fill {
+      height: 100%; border-radius: 4px;
+      background: var(--gradient2); width: 0;
+      transition: width 1.5s ease;
+    }
 
-        a {
-            text-decoration: none;
-            color: inherit;
-        }
-        img {
-            max-width: 100%;
-            display: block;
-        }
-        ul {
-            list-style: none;
-        }
+    /* SERVICES */
+    #services .services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 2rem; }
+    .service-card {
+      padding: 2rem; border-radius: 1.5rem;
+      background: var(--glass); border: 1px solid var(--border);
+      transition: all 0.4s; position: relative; overflow: hidden;
+    }
+    .service-card:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: 0 12px 40px rgba(108,92,231,0.1); }
+    .service-card .icon {
+      width: 3rem; height: 3rem; border-radius: 0.75rem;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(108,92,231,0.1); color: var(--primary);
+      font-size: 1.25rem; margin-bottom: 1rem;
+    }
+    .service-card h3 { font-family: 'Space Grotesk', sans-serif; font-size: 1.15rem; margin-bottom: 0.5rem; }
+    .service-card p { color: var(--text2); font-size: 0.9rem; line-height: 1.6; }
 
-        /* ============================================================
-                   LOADING SCREEN
-                   ============================================================ */
-        #loading-screen {
-            position: fixed;
-            inset: 0;
-            background: var(--bg-primary);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 99999;
-            transition: opacity 0.6s ease, visibility 0.6s ease;
-        }
-        #loading-screen.hidden {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
-        .loader-ring {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            border: 4px solid var(--border-glass);
-            border-top-color: var(--accent);
-            animation: spin 0.8s linear infinite;
-        }
-        .loader-ring-text {
-            margin-top: 20px;
-            font-family: var(--font-display);
-            font-weight: 600;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            letter-spacing: 3px;
-            text-transform: uppercase;
-        }
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
+    /* PROJECTS */
+    #projects .projects-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 2rem; }
+    .project-card {
+      padding: 0; border-radius: 1.5rem; overflow: hidden;
+      background: var(--glass); border: 1px solid var(--border);
+      transition: all 0.4s;
+    }
+    .project-card:hover { transform: translateY(-5px); border-color: var(--primary); }
+    .project-card-img {
+      height: 200px; background: var(--glass2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.5rem; color: var(--text2); position: relative; overflow: hidden;
+    }
+    .project-card-img .overlay {
+      position: absolute; inset: 0;
+      background: rgba(108,92,231,0.9); display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.4s; gap: 1rem;
+    }
+    .project-card:hover .overlay { opacity: 1; }
+    .project-card-img .overlay a {
+      width: 2.5rem; height: 2.5rem; border-radius: 50%;
+      background: #fff; color: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; transition: transform 0.3s;
+    }
+    .project-card-img .overlay a:hover { transform: scale(1.1); }
+    .project-card-body { padding: 1.5rem; }
+    .project-card-body h3 { font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; margin-bottom: 0.5rem; }
+    .project-card-body p { color: var(--text2); font-size: 0.85rem; line-height: 1.5; }
+    .project-card-body .tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
+    .project-card-body .tags span {
+      padding: 0.2rem 0.6rem; border-radius: 0.5rem;
+      background: rgba(108,92,231,0.1); color: var(--primary);
+      font-size: 0.75rem; font-weight: 500;
+    }
 
-        /* ============================================================
-                   TOAST NOTIFICATIONS
-                   ============================================================ */
-        #toast-container {
-            position: fixed;
-            top: 24px;
-            right: 24px;
-            z-index: 99998;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            max-width: 400px;
-            width: calc(100% - 48px);
-        }
-        .toast {
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            background: var(--toast-bg);
-            color: var(--toast-text);
-            padding: 14px 20px;
-            border-radius: 16px;
-            box-shadow: var(--shadow-glass);
-            border: 1px solid var(--border-glass);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            animation: toastIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-            cursor: pointer;
-        }
-        .toast.toast-out {
-            animation: toastOut 0.35s ease forwards;
-        }
-        .toast i {
-            font-size: 1.2rem;
-            flex-shrink: 0;
-        }
-        .toast.toast-success i {
-            color: var(--success);
-        }
-        .toast.toast-error i {
-            color: var(--error);
-        }
-        .toast.toast-warning i {
-            color: var(--warning);
-        }
-        .toast.toast-info i {
-            color: var(--accent);
-        }
-        @keyframes toastIn {
-            0% {
-                opacity: 0;
-                transform: translateX(80px) scale(0.95);
-            }
-            100% {
-                opacity: 1;
-                transform: translateX(0) scale(1);
-            }
-        }
-        @keyframes toastOut {
-            0% {
-                opacity: 1;
-                transform: translateX(0) scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: translateX(80px) scale(0.95);
-            }
-        }
+    /* EXPERIENCE TIMELINE */
+    #experience .timeline {
+      position: relative; padding: 2rem 0; margin-top: 2rem;
+    }
+    #experience .timeline::before {
+      content: ''; position: absolute; left: 1rem; top: 0; bottom: 0;
+      width: 2px; background: var(--border);
+    }
+    .timeline-item {
+      position: relative; padding-left: 3rem; padding-bottom: 2.5rem;
+    }
+    .timeline-item::before {
+      content: ''; position: absolute; left: 0.35rem; top: 0.25rem;
+      width: 1.3rem; height: 1.3rem; border-radius: 50%;
+      background: var(--gradient2); border: 3px solid var(--bg);
+    }
+    .timeline-item .date {
+      font-size: 0.8rem; color: var(--primary); font-weight: 600; margin-bottom: 0.25rem;
+    }
+    .timeline-item h3 { font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; }
+    .timeline-item .company { color: var(--text2); font-size: 0.85rem; margin-bottom: 0.5rem; }
+    .timeline-item p { color: var(--text2); font-size: 0.9rem; line-height: 1.6; }
 
-        /* ============================================================
-                   AUTH PAGES — LOGIN / REGISTER / FORGOT PASSWORD
-                   ============================================================ */
-        .auth-page {
-            position: fixed;
-            inset: 0;
-            z-index: 90000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--bg-primary);
-            padding: 20px;
-            transition: opacity 0.5s ease, visibility 0.5s ease;
-        }
-        .auth-page.hidden {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
+    /* TESTIMONIALS */
+    #testimonials .testimonials-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-top: 2rem; }
+    .testimonial-card {
+      padding: 2rem; border-radius: 1.5rem;
+      background: var(--glass); border: 1px solid var(--border);
+    }
+    .testimonial-card .stars { color: #f59e0b; margin-bottom: 1rem; font-size: 0.9rem; }
+    .testimonial-card p { color: var(--text2); font-size: 0.9rem; line-height: 1.7; font-style: italic; margin-bottom: 1rem; }
+    .testimonial-card .author { display: flex; align-items: center; gap: 0.75rem; }
+    .testimonial-card .author .avatar {
+      width: 2.5rem; height: 2.5rem; border-radius: 50%;
+      background: var(--gradient); display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 600; font-size: 0.85rem;
+    }
+    .testimonial-card .author .name { font-weight: 600; font-size: 0.9rem; }
+    .testimonial-card .author .role { font-size: 0.8rem; color: var(--text2); }
 
-        .auth-glass {
-            width: 100%;
-            max-width: 440px;
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            background: var(--bg-glass);
-            border: 1px solid var(--border-glass);
-            border-radius: 24px;
-            padding: 40px 32px;
-            box-shadow: var(--shadow-glass);
-        }
+    /* CONTACT */
+    #contact .contact-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-top: 2rem; }
+    .contact-form { }
+    .contact-form .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .contact-form input, .contact-form textarea {
+      width: 100%; padding: 0.85rem 1rem; border-radius: 0.75rem;
+      border: 1px solid var(--border); background: var(--glass2);
+      color: var(--text); font-size: 0.9rem; outline: none;
+      font-family: 'Inter', sans-serif; transition: border-color 0.3s;
+    }
+    .contact-form input:focus, .contact-form textarea:focus { border-color: var(--primary); }
+    .contact-form textarea { resize: vertical; min-height: 120px; }
+    .contact-info { display: flex; flex-direction: column; gap: 1.5rem; }
+    .contact-info .info-item {
+      display: flex; align-items: center; gap: 1rem;
+      padding: 1rem; border-radius: 1rem;
+      background: var(--glass); border: 1px solid var(--border);
+    }
+    .contact-info .info-item .icn {
+      width: 2.5rem; height: 2.5rem; border-radius: 0.75rem;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(108,92,231,0.1); color: var(--primary); font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .contact-info .info-item .info-text h4 { font-size: 0.85rem; font-weight: 600; }
+    .contact-info .info-item .info-text p { font-size: 0.8rem; color: var(--text2); }
 
-        .auth-glass .auth-logo {
-            text-align: center;
-            margin-bottom: 28px;
-        }
-        .auth-glass .auth-logo h1 {
-            font-family: var(--font-display);
-            font-size: 1.6rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .auth-glass .auth-logo p {
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            margin-top: 4px;
-        }
+    /* FOOTER */
+    footer {
+      padding: 2rem 1.5rem; max-width: 1100px; margin: 0 auto;
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 1rem;
+    }
+    footer p { color: var(--text2); font-size: 0.85rem; }
+    .social-links { display: flex; gap: 0.75rem; }
+    .social-links a {
+      width: 2.25rem; height: 2.25rem; border-radius: 0.5rem;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--glass2); color: var(--text2);
+      transition: all 0.3s; font-size: 1rem;
+    }
+    .social-links a:hover { background: var(--primary); color: #fff; transform: translateY(-2px); }
 
-        .auth-tabs {
-            display: flex;
-            gap: 4px;
-            background: var(--input-bg);
-            border-radius: 12px;
-            padding: 4px;
-            margin-bottom: 24px;
-        }
-        .auth-tab {
-            flex: 1;
-            padding: 10px;
-            text-align: center;
-            border: none;
-            background: transparent;
-            color: var(--text-muted);
-            font-family: var(--font-primary);
-            font-weight: 600;
-            font-size: 0.85rem;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .auth-tab.active {
-            background: var(--accent);
-            color: #fff;
-            box-shadow: 0 4px 12px rgba(108, 99, 255, 0.3);
-        }
-        .auth-tab:hover:not(.active) {
-            color: var(--text-primary);
-        }
+    /* BACK TO TOP */
+    #backToTop {
+      position: fixed; bottom: 2rem; right: 2rem; z-index: 999;
+      width: 3rem; height: 3rem; border-radius: 50%;
+      background: var(--gradient2); color: #fff; border: none;
+      font-size: 1.1rem; cursor: pointer; box-shadow: 0 4px 16px rgba(108,92,231,0.3);
+      opacity: 0; visibility: hidden; transform: translateY(20px);
+      transition: all 0.4s;
+    }
+    #backToTop.show { opacity: 1; visibility: visible; transform: translateY(0); }
+    #backToTop:hover { transform: translateY(-3px); }
 
-        .auth-form {
-            display: none;
-            flex-direction: column;
-            gap: 16px;
-        }
-        .auth-form.active {
-            display: flex;
-        }
+    /* NOTIFICATION */
+    .notification-container {
+      position: fixed; top: 5rem; right: 1.5rem; z-index: 99999;
+      display: flex; flex-direction: column; gap: 0.5rem;
+    }
+    .notification {
+      padding: 0.75rem 1.25rem; border-radius: 0.75rem;
+      background: var(--glass); backdrop-filter: blur(20px);
+      border: 1px solid var(--border); box-shadow: var(--shadow);
+      font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem;
+      animation: slideIn 0.4s ease;
+      max-width: 350px;
+    }
+    .notification.success { border-color: #10b981; }
+    .notification.error { border-color: #ef4444; }
+    .notification.info { border-color: var(--primary); }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(2rem); }
+      to { opacity: 1; transform: translateX(0); }
+    }
 
-        .auth-form .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .auth-form .form-group label {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            letter-spacing: 0.3px;
-        }
-        .auth-form .form-group input {
-            padding: 12px 16px;
-            border-radius: 12px;
-            border: 1.5px solid var(--input-border);
-            background: var(--input-bg);
-            color: var(--text-primary);
-            font-family: var(--font-primary);
-            font-size: 0.95rem;
-            outline: none;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-        }
-        .auth-form .form-group input:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-soft);
-        }
-        .auth-form .form-group input::placeholder {
-            color: var(--text-muted);
-        }
+    /* SCROLL REVEAL */
+    .reveal {
+      opacity: 0; transform: translateY(30px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
 
-        .auth-form .btn-primary {
-            padding: 14px;
-            border: none;
-            border-radius: 12px;
-            background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2));
-            color: #fff;
-            font-family: var(--font-primary);
-            font-weight: 700;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.3s ease;
-            letter-spacing: 0.3px;
-        }
-        .auth-form .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(108, 99, 255, 0.35);
-        }
-        .auth-form .btn-primary:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .auth-form .btn-google {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 13px;
-            border: 1.5px solid var(--input-border);
-            border-radius: 12px;
-            background: var(--input-bg);
-            color: var(--text-primary);
-            font-family: var(--font-primary);
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .auth-form .btn-google:hover {
-            border-color: var(--accent);
-            background: var(--accent-soft);
-            transform: translateY(-1px);
-        }
-        .auth-form .btn-google img {
-            width: 20px;
-            height: 20px;
-        }
-
-        .auth-divider {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: var(--text-muted);
-            font-size: 0.8rem;
-        }
-        .auth-divider::before,
-        .auth-divider::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: var(--input-border);
-        }
-
-        .auth-link {
-            text-align: center;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-        .auth-link button {
-            background: none;
-            border: none;
-            color: var(--accent);
-            font-weight: 600;
-            cursor: pointer;
-            font-family: var(--font-primary);
-            font-size: 0.85rem;
-        }
-        .auth-link button:hover {
-            text-decoration: underline;
-        }
-
-        .auth-error {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            border-radius: 10px;
-            padding: 10px 14px;
-            color: var(--error);
-            font-size: 0.82rem;
-            display: none;
-        }
-        .auth-error.show {
-            display: block;
-        }
-
-        /* ============================================================
-                   MAIN APP — PORTFOLIO (protected)
-                   ============================================================ */
-        #app {
-            display: none;
-        }
-        #app.visible {
-            display: block;
-        }
-
-        /* --- Navigation --- */
-        .navbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            background: var(--nav-bg);
-            border-bottom: 1px solid var(--border-glass);
-            padding: 0 24px;
-            height: 68px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: background 0.4s ease;
-        }
-        .navbar .nav-brand {
-            font-family: var(--font-display);
-            font-weight: 700;
-            font-size: 1.25rem;
-            background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .navbar .nav-links {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .navbar .nav-links a {
-            padding: 8px 14px;
-            border-radius: 10px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: var(--text-secondary);
-            transition: all 0.3s ease;
-        }
-        .navbar .nav-links a:hover,
-        .navbar .nav-links a.active {
-            background: var(--accent-soft);
-            color: var(--accent);
-        }
-
-        .navbar .nav-actions {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        /* Theme toggle */
-        .theme-toggle {
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
-            border: 1px solid var(--border-glass);
-            background: var(--bg-glass);
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-        .theme-toggle:hover {
-            background: var(--bg-glass-hover);
-            color: var(--accent);
-            transform: rotate(15deg);
-        }
-
-        /* User profile avatar in navbar */
-        .user-profile-btn {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 4px 12px 4px 4px;
-            border-radius: 30px;
-            border: 1px solid var(--border-glass);
-            background: var(--bg-glass);
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .user-profile-btn:hover {
-            background: var(--bg-glass-hover);
-            border-color: var(--accent);
-        }
-        .user-avatar {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            object-fit: cover;
-            background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-weight: 700;
-            font-size: 0.85rem;
-            flex-shrink: 0;
-            overflow: hidden;
-        }
-        .user-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .user-profile-btn .user-name-small {
-            font-size: 0.82rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            max-width: 100px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        /* Logout button */
-        .btn-logout {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 10px;
-            background: var(--accent-soft);
-            color: var(--accent);
-            font-family: var(--font-primary);
-            font-weight: 600;
-            font-size: 0.82rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .btn-logout:hover {
-            background: var(--error);
-            color: #fff;
-        }
-
-        /* Mobile hamburger */
-        .hamburger {
-            display: none;
-            width: 40px;
-            height: 40px;
-            border: none;
-            background: var(--bg-glass);
-            border-radius: 10px;
-            cursor: pointer;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-        }
-        .hamburger span {
-            width: 20px;
-            height: 2px;
-            background: var(--text-primary);
-            border-radius: 2px;
-            transition: all 0.3s ease;
-        }
-        .hamburger.active span:nth-child(1) {
-            transform: translateY(6px) rotate(45deg);
-        }
-        .hamburger.active span:nth-child(2) {
-            opacity: 0;
-        }
-        .hamburger.active span:nth-child(3) {
-            transform: translateY(-6px) rotate(-45deg);
-        }
-
-        /* ============================================================
-                   GLASSMORPHISM CARD UTILITY
-                   ============================================================ */
-        .glass {
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            background: var(--bg-glass);
-            border: 1px solid var(--border-glass);
-            border-radius: 20px;
-            box-shadow: var(--shadow-glass);
-            transition: all 0.3s ease;
-        }
-        .glass:hover {
-            box-shadow: var(--shadow-hover);
-            background: var(--bg-glass-hover);
-        }
-
-        /* ============================================================
-                   SECTION COMMON STYLES
-                   ============================================================ */
-        section {
-            padding: 100px 24px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .section-label {
-            font-size: 0.8rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            color: var(--accent);
-            margin-bottom: 8px;
-        }
-        .section-title {
-            font-family: var(--font-display);
-            font-size: 2.6rem;
-            font-weight: 700;
-            line-height: 1.2;
-            margin-bottom: 16px;
-        }
-        .section-title em {
-            font-style: normal;
-            background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .section-subtitle {
-            color: var(--text-muted);
-            font-size: 1.05rem;
-            max-width: 600px;
-            line-height: 1.7;
-        }
-
-        /* Scroll animation base */
-        .reveal {
-            opacity: 0;
-            transform: translateY(40px);
-            transition: opacity 0.7s ease, transform 0.7s ease;
-        }
-        .reveal.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* ============================================================
-                   HERO
-                   ============================================================ */
-        .hero {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            padding-top: 100px;
-            position: relative;
-            overflow: hidden;
-        }
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: -30%;
-            right: -10%;
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, var(--accent-soft) 0%, transparent 70%);
-            border-radius: 50%;
-            pointer-events: none;
-            opacity: 0.6;
-        }
-        .hero-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 60px;
-            align-items: center;
-            width: 100%;
-        }
-        .hero-content .hero-welcome {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--accent);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-bottom: 12px;
-            display: inline-block;
-            padding: 6px 16px;
-            border-radius: 30px;
-            background: var(--accent-soft);
-        }
-        .hero-content h1 {
-            font-family: var(--font-display);
-            font-size: 3.4rem;
-            font-weight: 700;
-            line-height: 1.15;
-            margin-bottom: 8px;
-        }
-        .hero-content h1 .highlight {
-            background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2), var(--gradient-3));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .hero-content .typing-wrapper {
-            font-size: 1.3rem;
-            color: var(--text-secondary);
-            margin-bottom: 24px;
-            min-height: 2rem;
-        }
-        .hero-content .typing-wrapper .cursor {
-            display: inline-block;
-            width: 2px;
-            height: 1.3rem;
-            background: var(--accent);
-            margin-left: 2px;
-            animation: blink 0.8s step-end infinite;
-        }
-        @keyframes blink {
-            50% {
-                opacity: 0;
-            }
-        }
-        .hero-content .hero-description {
-            color: var(--text-secondary);
-            font-size: 1.05rem;
-            line-height: 1.8;
-            max-width: 520px;
-            margin-bottom: 32px;
-        }
-        .hero-content .hero-buttons {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-        .hero-content .hero-buttons .btn-primary {
-            padding: 14px 32px;
-            border: none;
-            border-radius: 14px;
-            background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2));
-            color: #fff;
-            font-family: var(--font-primary);
-            font-weight: 700;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .hero-content .hero-buttons .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 32px rgba(108, 99, 255, 0.35);
-        }
-        .hero-content .hero-buttons .btn-outline {
-            padding: 14px 32px;
-            border: 1.5px solid var(--border-glass);
-            border-radius: 14px;
-            background: var(--bg-glass);
-            color: var(--text-primary);
-            font-family: var(--font-primary);
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .hero-content .hero-buttons .btn-outline:hover {
-            border-color: var(--accent);
-            background: var(--accent-soft);
-            transform: translateY(-3px);
-        }
-
-        .hero-image {
-            display: flex;
-            justify-content: center;
-        }
-        .hero-image .hero-img-wrapper {
-            width: 380px;
-            height: 380px;
-            border-radius: 50%;
-            overflow: hidden;
-            border: 3px solid var(--border-glass);
-            box-shadow: var(--shadow-glass);
-            position: relative;
-        }
-        .hero-image .hero-img-wrapper img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .hero-image .hero-img-wrapper::after {
-            content: '';
-            position: absolute;
-            inset: -6px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2), var(--gradient-3));
-            z-index: -1;
-            opacity: 0.4;
-            animation: glowPulse 3s ease-in-out infinite;
-        }
-        @keyframes glowPulse {
-            0%,
-            100% {
-                opacity: 0.3;
-                transform: scale(1);
-            }
-            50% {
-                opacity: 0.6;
-                transform: scale(1.04);
-            }
-        }
-
-        /* ============================================================
-                   ABOUT
-                   ============================================================ */
-        .about-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 50px;
-            align-items: center;
-            margin-top: 40px;
-        }
-        .about-image .about-img-wrapper {
-            border-radius: 24px;
-            overflow: hidden;
-            border: 2px solid var(--border-glass);
-            box-shadow: var(--shadow-glass);
-        }
-        .about-text p {
-            color: var(--text-secondary);
-            margin-bottom: 16px;
-            font-size: 1rem;
-            line-height: 1.8;
-        }
-        .about-stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-top: 32px;
-        }
-        .about-stat {
-            text-align: center;
-            padding: 20px 12px;
-        }
-        .about-stat .stat-number {
-            font-family: var(--font-display);
-            font-size: 2rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .about-stat .stat-label {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-top: 4px;
-        }
-
-        /* ============================================================
-                   SKILLS
-                   ============================================================ */
-        .skills-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 24px;
-            margin-top: 40px;
-        }
-        .skill-card {
-            padding: 24px;
-        }
-        .skill-card .skill-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .skill-card .skill-header .skill-name {
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-        .skill-card .skill-header .skill-percent {
-            font-weight: 700;
-            font-size: 0.85rem;
-            color: var(--accent);
-        }
-        .skill-bar {
-            width: 100%;
-            height: 8px;
-            border-radius: 10px;
-            background: var(--progress-bg);
-            overflow: hidden;
-        }
-        .skill-bar .skill-fill {
-            height: 100%;
-            border-radius: 10px;
-            background: linear-gradient(90deg, var(--gradient-1), var(--gradient-2));
-            width: 0%;
-            transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-
-        /* ============================================================
-                   SERVICES
-                   ============================================================ */
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 24px;
-            margin-top: 40px;
-        }
-        .service-card {
-            padding: 32px 24px;
-            text-align: center;
-        }
-        .service-card .service-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 18px;
-            background: var(--accent-soft);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 18px;
-            font-size: 1.5rem;
-            color: var(--accent);
-        }
-        .service-card h3 {
-            font-family: var(--font-display);
-            font-size: 1.15rem;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-        .service-card p {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            line-height: 1.7;
-        }
-
-        /* ============================================================
-                   PROJECTS GALLERY
-                   ============================================================ */
-        .projects-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 24px;
-            margin-top: 40px;
-        }
-        .project-card {
-            border-radius: 20px;
-            overflow: hidden;
-            border: 1px solid var(--border-glass);
-            background: var(--card-bg);
-            transition: all 0.4s ease;
-        }
-        .project-card:hover {
-            transform: translateY(-8px);
-            box-shadow: var(--shadow-hover);
-        }
-        .project-card .project-img {
-            width: 100%;
-            height: 220px;
-            object-fit: cover;
-        }
-        .project-card .project-info {
-            padding: 20px 22px;
-        }
-        .project-card .project-info h4 {
-            font-family: var(--font-display);
-            font-weight: 600;
-            font-size: 1.1rem;
-            margin-bottom: 6px;
-        }
-        .project-card .project-info .project-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-top: 10px;
-        }
-        .project-card .project-info .project-tags span {
-            padding: 4px 10px;
-            border-radius: 8px;
-            background: var(--tag-bg);
-            color: var(--tag-color);
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        /* ============================================================
-                   EXPERIENCE TIMELINE
-                   ============================================================ */
-        .timeline {
-            position: relative;
-            margin-top: 40px;
-            padding-left: 40px;
-        }
-        .timeline::before {
-            content: '';
-            position: absolute;
-            left: 14px;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background: var(--timeline-line);
-        }
-        .timeline-item {
-            position: relative;
-            padding-bottom: 36px;
-        }
-        .timeline-item:last-child {
-            padding-bottom: 0;
-        }
-        .timeline-item .timeline-dot {
-            position: absolute;
-            left: -32px;
-            top: 6px;
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: var(--accent);
-            border: 3px solid var(--bg-primary);
-            box-shadow: 0 0 0 2px var(--accent);
-        }
-        .timeline-item .timeline-content {
-            padding: 20px 24px;
-        }
-        .timeline-item .timeline-content .timeline-date {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--accent);
-            margin-bottom: 4px;
-        }
-        .timeline-item .timeline-content h4 {
-            font-family: var(--font-display);
-            font-weight: 600;
-            font-size: 1.05rem;
-        }
-        .timeline-item .timeline-content .timeline-company {
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            margin-bottom: 8px;
-        }
-        .timeline-item .timeline-content p {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            line-height: 1.7;
-        }
-
-        /* ============================================================
-                   CONTACT FORM
-                   ============================================================ */
-        .contact-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            margin-top: 40px;
-        }
-        .contact-form {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-        .contact-form .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-        .contact-form input,
-        .contact-form textarea {
-            padding: 14px 18px;
-            border-radius: 14px;
-            border: 1.5px solid var(--input-border);
-            background: var(--input-bg);
-            color: var(--text-primary);
-            font-family: var(--font-primary);
-            font-size: 0.9rem;
-            outline: none;
-            transition: all 0.3s ease;
-            width: 100%;
-        }
-        .contact-form input:focus,
-        .contact-form textarea:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-soft);
-        }
-        .contact-form textarea {
-            resize: vertical;
-            min-height: 130px;
-        }
-        .contact-form .btn-primary {
-            padding: 14px 32px;
-            border: none;
-            border-radius: 14px;
-            background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2));
-            color: #fff;
-            font-family: var(--font-primary);
-            font-weight: 700;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            align-self: flex-start;
-        }
-        .contact-form .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(108, 99, 255, 0.3);
-        }
-
-        .contact-info {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        .contact-info-item {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 16px 20px;
-        }
-        .contact-info-item i {
-            width: 44px;
-            height: 44px;
-            border-radius: 14px;
-            background: var(--accent-soft);
-            color: var(--accent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-            flex-shrink: 0;
-        }
-        .contact-info-item .info-text h5 {
-            font-size: 0.9rem;
-            font-weight: 600;
-        }
-        .contact-info-item .info-text p {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        /* ============================================================
-                   FOOTER
-                   ============================================================ */
-        .footer {
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            background: var(--footer-bg);
-            border-top: 1px solid var(--border-glass);
-            padding: 40px 24px 24px;
-            margin-top: 40px;
-        }
-        .footer-inner {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-        .footer-socials {
-            display: flex;
-            gap: 10px;
-        }
-        .footer-socials a {
-            width: 42px;
-            height: 42px;
-            border-radius: 12px;
-            border: 1px solid var(--border-glass);
-            background: var(--bg-glass);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-secondary);
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-        .footer-socials a:hover {
-            background: var(--accent);
-            color: #fff;
-            border-color: var(--accent);
-            transform: translateY(-3px);
-        }
-        .footer-copy {
-            font-size: 0.82rem;
-            color: var(--text-muted);
-        }
-
-        /* ============================================================
-                   BACK TO TOP
-                   ============================================================ */
-        #back-to-top {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            z-index: 999;
-            width: 48px;
-            height: 48px;
-            border-radius: 16px;
-            border: none;
-            background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2));
-            color: #fff;
-            font-size: 1.1rem;
-            cursor: pointer;
-            box-shadow: 0 4px 16px rgba(108, 99, 255, 0.3);
-            transition: all 0.3s ease;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(20px);
-        }
-        #back-to-top.visible {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-        #back-to-top:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(108, 99, 255, 0.4);
-        }
-
-        /* ============================================================
-                   MOBILE RESPONSIVE
-                   ============================================================ */
-        @media (max-width: 992px) {
-            .hero-grid {
-                grid-template-columns: 1fr;
-                text-align: center;
-                gap: 40px;
-            }
-            .hero-content h1 {
-                font-size: 2.6rem;
-            }
-            .hero-content .hero-description {
-                margin: 0 auto 28px;
-            }
-            .hero-content .hero-buttons {
-                justify-content: center;
-            }
-            .hero-image .hero-img-wrapper {
-                width: 280px;
-                height: 280px;
-            }
-            .about-grid {
-                grid-template-columns: 1fr;
-                text-align: center;
-            }
-            .about-text p {
-                text-align: left;
-            }
-            .about-stats {
-                justify-content: center;
-            }
-            .contact-grid {
-                grid-template-columns: 1fr;
-            }
-            .section-title {
-                font-size: 2rem;
-            }
-            .navbar .nav-links {
-                display: none;
-                position: fixed;
-                top: 68px;
-                left: 0;
-                right: 0;
-                background: var(--nav-bg);
-                backdrop-filter: blur(24px);
-                -webkit-backdrop-filter: blur(24px);
-                padding: 20px;
-                flex-direction: column;
-                border-bottom: 1px solid var(--border-glass);
-            }
-            .navbar .nav-links.open {
-                display: flex;
-            }
-            .hamburger {
-                display: flex;
-            }
-            .user-profile-btn .user-name-small {
-                display: none;
-            }
-            .auth-glass {
-                padding: 28px 20px;
-            }
-            .hero::before {
-                width: 300px;
-                height: 300px;
-            }
-            section {
-                padding: 70px 20px;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .hero-content h1 {
-                font-size: 2rem;
-            }
-            .hero-content .typing-wrapper {
-                font-size: 1rem;
-            }
-            .hero-image .hero-img-wrapper {
-                width: 220px;
-                height: 220px;
-            }
-            .section-title {
-                font-size: 1.6rem;
-            }
-            .projects-grid {
-                grid-template-columns: 1fr;
-            }
-            .skills-grid {
-                grid-template-columns: 1fr;
-            }
-            .services-grid {
-                grid-template-columns: 1fr;
-            }
-            .contact-form .form-row {
-                grid-template-columns: 1fr;
-            }
-            .about-stats {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 10px;
-            }
-            .about-stat .stat-number {
-                font-size: 1.5rem;
-            }
-            .navbar {
-                padding: 0 16px;
-            }
-            .footer-inner {
-                flex-direction: column;
-                text-align: center;
-            }
-            .auth-glass {
-                padding: 24px 16px;
-            }
-            .timeline {
-                padding-left: 30px;
-            }
-            .timeline-item .timeline-dot {
-                left: -24px;
-            }
-        }
-    </style>
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+      .hero-grid, #about .about-grid { grid-template-columns: 1fr; }
+      .hero-image { order: -1; }
+      .hero-title { font-size: 2.5rem; }
+      .services-grid, .projects-grid, .testimonials-grid, .skills-grid { grid-template-columns: 1fr 1fr; }
+      .contact-grid { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+      .nav-links.open {
+        display: flex; flex-direction: column;
+        position: absolute; top: 100%; left: 1rem; right: 1rem;
+        background: var(--nav-bg); backdrop-filter: blur(20px);
+        border: 1px solid var(--border); border-radius: 1rem;
+        padding: 0.5rem; margin-top: 0.5rem;
+      }
+    }
+    @media (max-width: 600px) {
+      .services-grid, .projects-grid, .testimonials-grid, .skills-grid { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: 1fr; }
+      .section-title { font-size: 2rem; }
+      .contact-form .form-row { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+    }
+  </style>
 </head>
 <body>
 
-    <!-- ============================================================
-    LOADING SCREEN
-    ============================================================ -->
-    <div id="loading-screen">
-        <div class="loader-ring"></div>
-        <div class="loader-ring-text">Loading</div>
+<!-- LOADING SCREEN -->
+<div id="loadingScreen">
+  <div class="loader"></div>
+  <div class="loader-text">LOADING</div>
+</div>
+
+<!-- NOTIFICATION CONTAINER -->
+<div class="notification-container" id="notifContainer"></div>
+
+<!-- ===== AUTH OVERLAY ===== -->
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-card">
+    <div class="logo">✦ Portfolio</div>
+    <div class="auth-tabs">
+      <div class="auth-tab active" data-tab="login" onclick="switchAuthTab('login')">Sign In</div>
+      <div class="auth-tab" data-tab="register" onclick="switchAuthTab('register')">Register</div>
     </div>
 
-    <!-- ============================================================
-    TOAST CONTAINER
-    ============================================================ -->
-    <div id="toast-container"></div>
-
-    <!-- ============================================================
-    AUTH PAGE (shown when not logged in)
-    ============================================================ -->
-    <div id="auth-page" class="auth-page">
-        <div class="auth-glass">
-
-            <!-- Logo -->
-            <div class="auth-logo">
-                <h1>✦ Portfolio</h1>
-                <p>Sign in to view my work</p>
-            </div>
-
-            <!-- Tabs -->
-            <div class="auth-tabs">
-                <button class="auth-tab active" data-tab="login">Sign In</button>
-                <button class="auth-tab" data-tab="register">Register</button>
-            </div>
-
-            <!-- Error display -->
-            <div id="auth-error" class="auth-error"></div>
-
-            <!-- ===== LOGIN FORM ===== -->
-            <form id="login-form" class="auth-form active" autocomplete="off">
-                <div class="form-group">
-                    <label for="login-email">Email</label>
-                    <input type="email" id="login-email" placeholder="you@example.com" required />
-                </div>
-                <div class="form-group">
-                    <label for="login-password">Password</label>
-                    <input type="password" id="login-password" placeholder="••••••••" required />
-                </div>
-                <button type="submit" class="btn-primary" id="login-btn">Sign In</button>
-
-                <div class="auth-divider">or continue with</div>
-
-                <button type="button" class="btn-google" id="google-login-btn">
-                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23FFC107' d='M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z'/%3E%3Cpath fill='%23FF3D00' d='m6.306 14.691 6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z'/%3E%3Cpath fill='%234CAF50' d='M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z'/%3E%3Cpath fill='%231976D2' d='M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z'/%3E%3C/svg%3E" alt="Google" />
-                    Continue with Google
-                </button>
-
-                <div class="auth-link">
-                    <button type="button" id="forgot-link">Forgot password?</button>
-                </div>
-            </form>
-
-            <!-- ===== REGISTER FORM ===== -->
-            <form id="register-form" class="auth-form" autocomplete="off">
-                <div class="form-group">
-                    <label for="reg-name">Full Name</label>
-                    <input type="text" id="reg-name" placeholder="John Doe" required />
-                </div>
-                <div class="form-group">
-                    <label for="reg-email">Email</label>
-                    <input type="email" id="reg-email" placeholder="you@example.com" required />
-                </div>
-                <div class="form-group">
-                    <label for="reg-password">Password (min 6 chars)</label>
-                    <input type="password" id="reg-password" placeholder="••••••••" minlength="6" required />
-                </div>
-                <div class="form-group">
-                    <label for="reg-confirm">Confirm Password</label>
-                    <input type="password" id="reg-confirm" placeholder="••••••••" minlength="6" required />
-                </div>
-                <button type="submit" class="btn-primary" id="register-btn">Create Account</button>
-
-                <div class="auth-divider">or continue with</div>
-
-                <button type="button" class="btn-google" id="google-register-btn">
-                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%23FFC107' d='M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z'/%3E%3Cpath fill='%23FF3D00' d='m6.306 14.691 6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z'/%3E%3Cpath fill='%234CAF50' d='M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z'/%3E%3Cpath fill='%231976D2' d='M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z'/%3E%3C/svg%3E" alt="Google" />
-                    Continue with Google
-                </button>
-
-                <div class="auth-link">
-                    Already have an account? <button type="button" id="switch-to-login">Sign In</button>
-                </div>
-            </form>
-
-            <!-- ===== FORGOT PASSWORD FORM ===== -->
-            <form id="forgot-form" class="auth-form" autocomplete="off">
-                <div class="form-group">
-                    <label for="forgot-email">Email Address</label>
-                    <input type="email" id="forgot-email" placeholder="you@example.com" required />
-                </div>
-                <button type="submit" class="btn-primary" id="forgot-btn">Send Reset Link</button>
-                <div class="auth-link">
-                    <button type="button" id="back-to-login">← Back to Sign In</button>
-                </div>
-            </form>
-
-        </div>
+    <!-- LOGIN FORM -->
+    <div class="auth-form active" id="loginForm">
+      <input type="email" id="loginEmail" placeholder="Email" autocomplete="email" />
+      <div style="position:relative;">
+        <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" />
+        <div class="forgot-link" onclick="showForgot()">Forgot password?</div>
+      </div>
+      <div class="error-msg" id="loginError"></div>
+      <button class="btn-primary" id="loginBtn" onclick="handleLogin()">Sign In</button>
+      <div class="divider">or continue with</div>
+      <button class="google-btn" onclick="handleGoogleLogin()">
+        <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+        Continue with Google
+      </button>
+      <div class="auth-link">Don't have an account? <span onclick="switchAuthTab('register')">Register</span></div>
     </div>
 
-    <!-- ============================================================
-    MAIN APP — PROTECTED PORTFOLIO
-    ============================================================ -->
-    <div id="app">
+    <!-- REGISTER FORM -->
+    <div class="auth-form" id="registerForm">
+      <input type="text" id="regName" placeholder="Full Name" autocomplete="name" />
+      <input type="email" id="regEmail" placeholder="Email" autocomplete="email" />
+      <input type="password" id="regPassword" placeholder="Password (min 6 chars)" autocomplete="new-password" />
+      <input type="password" id="regConfirm" placeholder="Confirm Password" autocomplete="new-password" />
+      <div class="error-msg" id="regError"></div>
+      <button class="btn-primary" id="regBtn" onclick="handleRegister()">Create Account</button>
+      <div class="divider">or continue with</div>
+      <button class="google-btn" onclick="handleGoogleLogin()">
+        <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+        Continue with Google
+      </button>
+      <div class="auth-link">Already have an account? <span onclick="switchAuthTab('login')">Sign In</span></div>
+    </div>
 
-        <!-- ===== NAVBAR ===== -->
-        <nav class="navbar" id="navbar">
-            <div class="nav-brand">Ilyas.</div>
+    <!-- FORGOT PASSWORD -->
+    <div class="auth-form" id="forgotForm">
+      <h2 style="font-size:1.25rem;">Reset Password</h2>
+      <p class="sub">Enter your email and we'll send a reset link</p>
+      <input type="email" id="forgotEmail" placeholder="Email address" />
+      <div class="error-msg" id="forgotError"></div>
+      <div class="success-msg" id="forgotSuccess"></div>
+      <button class="btn-primary" id="forgotBtn" onclick="handleForgotPassword()">Send Reset Link</button>
+      <div class="auth-link"><span onclick="switchAuthTab('login')">← Back to Sign In</span></div>
+    </div>
+  </div>
+</div>
 
-            <div class="nav-links" id="nav-links">
-                <a href="#home" class="active">Home</a>
-                <a href="#about">About Me</a>
-                <a href="#skills">Skills</a>
-                <a href="#services">Services</a>
-                <a href="#projects">Projects</a>
-                <a href="#experience">Experience</a>
-                <a href="#contact">Contact</a>
-            </div>
+<!-- ===== MAIN WEBSITE ===== -->
+<div id="mainSite">
 
-            <div class="nav-actions">
-                <!-- Theme toggle -->
-                <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
-                    <i class="fas fa-moon"></i>
-                </button>
-
-                <!-- User profile -->
-                <div class="user-profile-btn" id="user-profile-btn" title="Profile">
-                    <div class="user-avatar" id="nav-avatar">
-                        <span id="nav-initials">I</span>
-                    </div>
-                    <span class="user-name-small" id="nav-username">User</span>
-                </div>
-
-                <!-- Logout -->
-                <button class="btn-logout" id="logout-btn">
-                    <i class="fas fa-sign-out-alt"></i>
-                </button>
-
-                <!-- Hamburger -->
-                <button class="hamburger" id="hamburger" aria-label="Menu">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </button>
-            </div>
-        </nav>
-
-        <!-- ===== HERO SECTION ===== -->
-        <section class="hero" id="home">
-            <div class="hero-grid">
-                <div class="hero-content reveal">
-                    <span class="hero-welcome">✦ Welcome</span>
-                    <h1>Hi, I am<br /><span class="highlight">Mr. Ilyas Abdi Ali</span></h1>
-                    <div class="typing-wrapper">
-                        <span id="typing-text"></span><span class="cursor"></span>
-                    </div>
-                    <p class="hero-description">
-                        Passionate Web Developer &amp; Designer crafting clean, performant, and beautiful digital experiences. Turning ideas into pixel-perfect reality.
-                    </p>
-                    <div class="hero-buttons">
-                        <a href="#projects" class="btn-primary">View My Work</a>
-                        <a href="#contact" class="btn-outline">Get In Touch</a>
-                    </div>
-                </div>
-                <div class="hero-image reveal">
-                    <div class="hero-img-wrapper">
-                        <img src="https://i.ibb.co/W4Pf34pg/file-0000000028ec71f49b86ee296e2dc895.png" alt="Mr. Ilyas Abdi Ali" />
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ===== ABOUT SECTION ===== -->
-        <section id="about">
-            <span class="section-label reveal">About Me</span>
-            <h2 class="section-title reveal">Building Digital <em>Experiences</em></h2>
-            <p class="section-subtitle reveal">Passionate about crafting clean, performant, and beautiful web solutions.</p>
-
-            <div class="about-grid">
-                <div class="about-image reveal">
-                    <div class="about-img-wrapper glass">
-                        <img src="https://i.ibb.co/W4Pf34pg/file-0000000028ec71f49b86ee296e2dc895.png" alt="About Mr. Ilyas" />
-                    </div>
-                </div>
-                <div class="about-text reveal">
-                    <p>
-                        I'm <strong>Mr. Ilyas Abdi Ali</strong>, a passionate Web Developer &amp; Designer with over 5 years of experience building premium digital experiences. I specialize in creating clean, minimalistic, and high-performance websites that blend aesthetic beauty with robust functionality.
-                    </p>
-                    <p>
-                        My approach is rooted in simplicity — every pixel has purpose, every interaction is intentional. From full-stack web applications to elegant landing pages, I bring ideas to life with modern technologies and timeless design principles.
-                    </p>
-                    <div class="about-stats">
-                        <div class="about-stat glass">
-                            <div class="stat-number" data-target="5">0</div>
-                            <div class="stat-label">Years Exp.</div>
-                        </div>
-                        <div class="about-stat glass">
-                            <div class="stat-number" data-target="50">0</div>
-                            <div class="stat-label">Projects</div>
-                        </div>
-                        <div class="about-stat glass">
-                            <div class="stat-number" data-target="30">0</div>
-                            <div class="stat-label">Clients</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ===== SKILLS SECTION ===== -->
-        <section id="skills">
-            <span class="section-label reveal">Expertise</span>
-            <h2 class="section-title reveal">My <em>Skills</em></h2>
-
-            <div class="skills-grid" id="skills-grid">
-                <!-- Skills injected by JS -->
-            </div>
-        </section>
-
-        <!-- ===== SERVICES SECTION ===== -->
-        <section id="services">
-            <span class="section-label reveal">What I Do</span>
-            <h2 class="section-title reveal">Premium <em>Services</em></h2>
-            <p class="section-subtitle reveal">Transforming your vision into exceptional digital products</p>
-
-            <div class="services-grid">
-                <div class="service-card glass reveal">
-                    <div class="service-icon"><i class="fas fa-code"></i></div>
-                    <h3>Web Development</h3>
-                    <p>Custom websites and web applications built with modern frameworks, optimized for speed, SEO, and scalability.</p>
-                </div>
-                <div class="service-card glass reveal">
-                    <div class="service-icon"><i class="fas fa-paint-brush"></i></div>
-                    <h3>UI/UX Design</h3>
-                    <p>User-centric interface design crafted with precision. Wireframes, prototypes, and pixel-perfect mockups.</p>
-                </div>
-                <div class="service-card glass reveal">
-                    <div class="service-icon"><i class="fas fa-mobile-alt"></i></div>
-                    <h3>Responsive Design</h3>
-                    <p>Flawlessly responsive layouts that deliver exceptional experiences across every device and screen size.</p>
-                </div>
-                <div class="service-card glass reveal">
-                    <div class="service-icon"><i class="fas fa-shopping-cart"></i></div>
-                    <h3>E-Commerce</h3>
-                    <p>Full-featured online stores with secure payments, inventory management, and seamless checkout experiences.</p>
-                </div>
-                <div class="service-card glass reveal">
-                    <div class="service-icon"><i class="fas fa-tachometer-alt"></i></div>
-                    <h3>Performance Optimization</h3>
-                    <p>Speed audits, code optimization, lazy loading, and caching strategies for lightning-fast load times.</p>
-                </div>
-                <div class="service-card glass reveal">
-                    <div class="service-icon"><i class="fas fa-headset"></i></div>
-                    <h3>Consulting &amp; Support</h3>
-                    <p>Technical consulting, code reviews, maintenance plans, and ongoing support for your digital products.</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- ===== PROJECTS SECTION ===== -->
-        <section id="projects">
-            <span class="section-label reveal">Portfolio</span>
-            <h2 class="section-title reveal">Featured <em>Projects</em></h2>
-            <p class="section-subtitle reveal">A selection of recent work that showcases my passion for clean design and robust development</p>
-
-            <div class="projects-grid" id="projects-grid">
-                <!-- Projects injected by JS -->
-            </div>
-        </section>
-
-        <!-- ===== EXPERIENCE TIMELINE ===== -->
-        <section id="experience">
-            <span class="section-label reveal">Career</span>
-            <h2 class="section-title reveal">My <em>Experience</em></h2>
-
-            <div class="timeline" id="timeline">
-                <!-- Timeline items injected by JS -->
-            </div>
-        </section>
-
-        <!-- ===== CONTACT SECTION ===== -->
-        <section id="contact">
-            <span class="section-label reveal">Get In Touch</span>
-            <h2 class="section-title reveal">Let's Work <em>Together</em></h2>
-            <p class="section-subtitle reveal">Have a project in mind? I'd love to hear about it.</p>
-
-            <div class="contact-grid">
-                <form class="contact-form reveal" id="contact-form">
-                    <div class="form-row">
-                        <input type="text" placeholder="Your Name" required />
-                        <input type="email" placeholder="Your Email" required />
-                    </div>
-                    <input type="text" placeholder="Subject" required />
-                    <textarea placeholder="Your Message..." required></textarea>
-                    <button type="submit" class="btn-primary">Send Message</button>
-                </form>
-
-                <div class="contact-info reveal">
-                    <div class="contact-info-item glass">
-                        <i class="fas fa-envelope"></i>
-                        <div class="info-text">
-                            <h5>Email</h5>
-                            <p>ilyas@adeege.gt.tc</p>
-                        </div>
-                    </div>
-                    <div class="contact-info-item glass">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <div class="info-text">
-                            <h5>Location</h5>
-                            <p>Remote / Available Worldwide</p>
-                        </div>
-                    </div>
-                    <div class="contact-info-item glass">
-                        <i class="fas fa-clock"></i>
-                        <div class="info-text">
-                            <h5>Availability</h5>
-                            <p>Open for freelance &amp; full-time</p>
-                          </div>
-                       </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ===== FOOTER ===== -->
-        <footer class="footer">
-            <div class="footer-inner">
-                <div class="footer-copy">&copy; 2026 Mr. Ilyas Abdi Ali. All rights reserved.</div>
-                <div class="footer-socials">
-                    <a href="#" aria-label="GitHub"><i class="fab fa-github"></i></a>
-                    <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-                    <a href="#" aria-label="Dribbble"><i class="fab fa-dribbble"></i></a>
-                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-                </div>
-            </div>
-        </footer>
-
-    </div><!-- /#app -->
-
-    <!-- ===== BACK TO TOP ===== -->
-    <button id="back-to-top" aria-label="Back to top">
-        <i class="fas fa-arrow-up"></i>
+<!-- NAVIGATION -->
+<nav>
+  <div class="nav-logo"><span>Ilyas.</span></div>
+  <div class="nav-links" id="navLinks">
+    <a href="#home" class="active">Home</a>
+    <a href="#about">About Me</a>
+    <a href="#skills">Skills</a>
+    <a href="#services">Services</a>
+    <a href="#projects">Projects</a>
+    <a href="#experience">Experience</a>
+    <a href="#contact">Contact</a>
+  </div>
+  <div class="nav-right">
+    <button class="theme-btn" onclick="toggleTheme()" id="themeToggle" aria-label="Toggle theme">
+      <i class="fas fa-moon"></i>
     </button>
+    <div style="position:relative;">
+      <div class="user-avatar" id="userAvatar" onclick="toggleDropdown()">
+        <span id="avatarInitials">I</span>
+      </div>
+      <div class="user-dropdown" id="userDropdown">
+        <div class="user-info">
+          <p id="dropdownName">User</p>
+          <span id="dropdownEmail">user@example.com</span>
+        </div>
+        <button class="logout-btn" onclick="handleLogout()">Sign Out</button>
+      </div>
+    </div>
+    <button class="hamburger" onclick="toggleMobileNav()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
 
-    <!-- ============================================================
-    FIREBASE MODULAR SDK (CDN v12.13.0)
-    ============================================================ -->
-    <script type="module">
-        // ================================================================
-        // 🔥 FIREBASE CONFIG — REPLACE WITH YOUR OWN PROJECT CONFIG
-        // ================================================================
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js';
-        import {
-            getAuth,
-            createUserWithEmailAndPassword,
-            signInWithEmailAndPassword,
-            signInWithPopup,
-            GoogleAuthProvider,
-            sendPasswordResetEmail,
-            sendEmailVerification,
-            signOut,
-            onAuthStateChanged,
-            updateProfile
-        } from 'https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js';
+<!-- HERO -->
+<section id="home">
+  <div class="hero-grid">
+    <div>
+      <div class="hero-badge"><i class="fas fa-sparkles"></i> ✦ Welcome</div>
+      <h1 class="hero-title">Hi, I am<br /><span>Mr. Ilyas Abdi Ali</span></h1>
+      <p class="hero-text">
+        <span id="typedText"></span><span class="typing-cursor">|</span>
+      </p>
+      <div class="hero-buttons">
+        <a href="#projects" class="btn-primary"><i class="fas fa-eye"></i> View My Work</a>
+        <a href="#contact" class="btn-outline"><i class="fas fa-envelope"></i> Get In Touch</a>
+      </div>
+    </div>
+    <div class="hero-image">
+      <img src="https://i.ibb.co/W4Pf34pg/file-0000000028ec71f49b86ee296e2dc895.png" alt="Mr. Ilyas Abdi Ali" />
+    </div>
+  </div>
+</section>
 
-        // ⚠️ REPLACE THIS with your own Firebase project config from
-        //     Firebase Console → Project Settings → General → Your apps → Web
-        const firebaseConfig = {
-            apiKey: "AIzaSyBzgoI6WiZ-2cGvALjSzS1fHIeeEnUy-Ts",
-            authDomain: "my-awr-f12c1.firebaseapp.com",
-            projectId: "my-awr-f12c1",
-            storageBucket: "my-awr-f12c1.firebasestorage.app",
-            messagingSenderId: "566434636051",
-            appId: "1:566434636051:android:02ca7d09cdfbf9ef31bae6"
-        };
+<!-- ABOUT -->
+<section id="about">
+  <div class="section-tag">About Me</div>
+  <h2 class="section-title">Building Digital <em>Experiences</em></h2>
+  <p class="section-desc">Passionate about crafting clean, performant, and beautiful web solutions.</p>
+  <div class="about-grid" style="margin-top:2rem;">
+    <div class="about-image">
+      <img src="https://i.ibb.co/W4Pf34pg/file-0000000028ec71f49b86ee296e2dc895.png" alt="About Mr. Ilyas" />
+    </div>
+    <div class="about-text">
+      <p>I'm <strong>Mr. Ilyas Abdi Ali</strong>, a passionate Web Developer & Designer with over 5 years of experience building premium digital experiences. I specialize in creating clean, minimalistic, and high-performance websites that blend aesthetic beauty with robust functionality.</p>
+      <p>My approach is rooted in simplicity — every pixel has purpose, every interaction is intentional. From full-stack web applications to elegant landing pages, I bring ideas to life with modern technologies and timeless design principles.</p>
+      <div class="stats-grid">
+        <div class="stat-item"><div class="num"><span class="counter" data-target="5">0</span>+</div><div class="label">Years Exp.</div></div>
+        <div class="stat-item"><div class="num"><span class="counter" data-target="50">0</span>+</div><div class="label">Projects</div></div>
+        <div class="stat-item"><div class="num"><span class="counter" data-target="30">0</span>+</div><div class="label">Clients</div></div>
+      </div>
+    </div>
+  </div>
+</section>
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const googleProvider = new GoogleAuthProvider();
+<!-- SKILLS -->
+<section id="skills">
+  <div class="section-tag">Expertise</div>
+  <h2 class="section-title">My <em>Skills</em></h2>
+  <div class="skills-grid" id="skillsGrid">
+    <div class="skill-item reveal"><div class="skill-header"><span>HTML & CSS</span><span>95%</span></div><div class="skill-bar"><div class="skill-bar-fill" data-width="95"></div></div></div>
+    <div class="skill-item reveal"><div class="skill-header"><span>JavaScript</span><span>90%</span></div><div class="skill-bar"><div class="skill-bar-fill" data-width="90"></div></div></div>
+    <div class="skill-item reveal"><div class="skill-header"><span>React / Next.js</span><span>88%</span></div><div class="skill-bar"><div class="skill-bar-fill" data-width="88"></div></div></div>
+    <div class="skill-item reveal"><div class="skill-header"><span>Node.js</span><span>82%</span></div><div class="skill-bar"><div class="skill-bar-fill" data-width="82"></div></div></div>
+    <div class="skill-item reveal"><div class="skill-header"><span>UI/UX Design</span><span>85%</span></div><div class="skill-bar"><div class="skill-bar-fill" data-width="85"></div></div></div>
+    <div class="skill-item reveal"><div class="skill-header"><span>Python</span><span>75%</span></div><div class="skill-bar"><div class="skill-bar-fill" data-width="75"></div></div></div>
+  </div>
+</section>
 
-        // ================================================================
-        // DOM REFERENCES
-        // ================================================================
-        const $ = (sel) => document.querySelector(sel);
-        const $$ = (sel) => document.querySelectorAll(sel);
+<!-- SERVICES -->
+<section id="services">
+  <div class="section-tag">What I Do</div>
+  <h2 class="section-title">Premium <em>Services</em></h2>
+  <p class="section-desc">Transforming your vision into exceptional digital products</p>
+  <div class="services-grid">
+    <div class="service-card reveal">
+      <div class="icon"><i class="fas fa-code"></i></div>
+      <h3>Web Development</h3>
+      <p>Custom websites and web applications built with modern frameworks, optimized for speed, SEO, and scalability.</p>
+    </div>
+    <div class="service-card reveal">
+      <div class="icon"><i class="fas fa-paint-brush"></i></div>
+      <h3>UI/UX Design</h3>
+      <p>User-centric interface design crafted with precision. Wireframes, prototypes, and pixel-perfect mockups.</p>
+    </div>
+    <div class="service-card reveal">
+      <div class="icon"><i class="fas fa-mobile-alt"></i></div>
+      <h3>Responsive Design</h3>
+      <p>Flawlessly responsive layouts that deliver exceptional experiences across every device and screen size.</p>
+    </div>
+    <div class="service-card reveal">
+      <div class="icon"><i class="fas fa-shopping-cart"></i></div>
+      <h3>E-Commerce</h3>
+      <p>Full-featured online stores with secure payments, inventory management, and seamless checkout experiences.</p>
+    </div>
+    <div class="service-card reveal">
+      <div class="icon"><i class="fas fa-rocket"></i></div>
+      <h3>Performance Optimization</h3>
+      <p>Speed audits, code optimization, lazy loading, and caching strategies for lightning-fast load times.</p>
+    </div>
+    <div class="service-card reveal">
+      <div class="icon"><i class="fas fa-headset"></i></div>
+      <h3>Consulting & Support</h3>
+      <p>Technical consulting, code reviews, maintenance plans, and ongoing support for your digital products.</p>
+    </div>
+  </div>
+</section>
 
-        const loadingScreen = $('#loading-screen');
-        const authPage = $('#auth-page');
-        const appEl = $('#app');
-        const authError = $('#auth-error');
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="section-tag">Portfolio</div>
+  <h2 class="section-title">Featured <em>Projects</em></h2>
+  <p class="section-desc">A selection of recent work that showcases my passion for clean design and robust development</p>
+  <div class="projects-grid">
+    <div class="project-card reveal">
+      <div class="project-card-img">
+        <i class="fas fa-globe"></i>
+        <div class="overlay">
+          <a href="#"><i class="fas fa-link"></i></a>
+          <a href="#"><i class="fab fa-github"></i></a>
+        </div>
+      </div>
+      <div class="project-card-body">
+        <h3>Modern Dashboard</h3>
+        <p>Full-featured admin dashboard with real-time analytics and dark mode.</p>
+        <div class="tags"><span>React</span><span>D3</span><span>Node.js</span></div>
+      </div>
+    </div>
+    <div class="project-card reveal">
+      <div class="project-card-img">
+        <i class="fas fa-store"></i>
+        <div class="overlay">
+          <a href="#"><i class="fas fa-link"></i></a>
+          <a href="#"><i class="fab fa-github"></i></a>
+        </div>
+      </div>
+      <div class="project-card-body">
+        <h3>E-Commerce Platform</h3>
+        <p>Headless commerce storefront with edge personalization.</p>
+        <div class="tags"><span>Next.js</span><span>Stripe</span><span>Tailwind</span></div>
+      </div>
+    </div>
+    <div class="project-card reveal">
+      <div class="project-card-img">
+        <i class="fas fa-brain"></i>
+        <div class="overlay">
+          <a href="#"><i class="fas fa-link"></i></a>
+          <a href="#"><i class="fab fa-github"></i></a>
+        </div>
+      </div>
+      <div class="project-card-body">
+        <h3>AI Notes App</h3>
+        <p>Intelligent note-taking with semantic search and encryption.</p>
+        <div class="tags"><span>TypeScript</span><span>AI</span><span>Vector DB</span></div>
+      </div>
+    </div>
+  </div>
+</section>
 
-        const loginForm = $('#login-form');
-        const registerForm = $('#register-form');
-        const forgotForm = $('#forgot-form');
-        const loginBtn = $('#login-btn');
-        const registerBtn = $('#register-btn');
-        const forgotBtn = $('#forgot-btn');
-        const googleLoginBtn = $('#google-login-btn');
-        const googleRegisterBtn = $('#google-register-btn');
+<!-- EXPERIENCE -->
+<section id="experience">
+  <div class="section-tag">Career</div>
+  <h2 class="section-title">My <em>Experience</em></h2>
+  <div class="timeline">
+    <div class="timeline-item reveal">
+      <div class="date">2024 — Present</div>
+      <h3>Senior Web Developer</h3>
+      <div class="company">Freelance / Remote</div>
+      <p>Leading full-stack development for diverse clients. Building performant, scalable web applications from concept to deployment.</p>
+    </div>
+    <div class="timeline-item reveal">
+      <div class="date">2022 — 2024</div>
+      <h3>UI/UX Designer & Developer</h3>
+      <div class="company">Digital Agency</div>
+      <p>Designed and developed responsive websites and web apps. Collaborated with cross-functional teams to deliver client projects.</p>
+    </div>
+    <div class="timeline-item reveal">
+      <div class="date">2020 — 2022</div>
+      <h3>Junior Web Developer</h3>
+      <div class="company">Tech Startup</div>
+      <p>Built and maintained websites and internal tools. Gained expertise in modern JavaScript frameworks and RESTful APIs.</p>
+    </div>
+  </div>
+</section>
 
-        const forgotLink = $('#forgot-link');
-        const backToLogin = $('#back-to-login');
-        const switchToLogin = $('#switch-to-login');
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="section-tag">Testimonials</div>
+  <h2 class="section-title">What <em>Clients Say</em></h2>
+  <div class="testimonials-grid">
+    <div class="testimonial-card reveal">
+      <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+      <p>"Ilyas delivered an outstanding website that exceeded our expectations. His attention to detail and technical expertise are remarkable."</p>
+      <div class="author">
+        <div class="avatar">AH</div>
+        <div><div class="name">Ahmed Hassan</div><div class="role">CEO, TechCorp</div></div>
+      </div>
+    </div>
+    <div class="testimonial-card reveal">
+      <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+      <p>"Working with Ilyas was a fantastic experience. He understood our vision perfectly and delivered a beautiful, fast website."</p>
+      <div class="author">
+        <div class="avatar">FM</div>
+        <div><div class="name">Fatima Mohamed</div><div class="role">Founder, StartupLab</div></div>
+      </div>
+    </div>
+  </div>
+</section>
 
-        const authTabs = $$('.auth-tab');
-        const navAvatar = $('#nav-avatar');
-        const navInitials = $('#nav-initials');
-        const navUsername = $('#nav-username');
-        const logoutBtn = $('#logout-btn');
-        const userProfileBtn = $('#user-profile-btn');
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-tag">Get In Touch</div>
+  <h2 class="section-title">Let's Work <em>Together</em></h2>
+  <p class="section-desc">Have a project in mind? I'd love to hear about it.</p>
+  <div class="contact-grid" style="margin-top:2rem;">
+    <form class="contact-form" onsubmit="handleContactForm(event)">
+      <div class="form-row">
+        <input type="text" name="name" placeholder="Your Name" required />
+        <input type="email" name="email" placeholder="Your Email" required />
+      </div>
+      <input type="text" name="subject" placeholder="Subject" />
+      <textarea name="message" placeholder="Your Message" required></textarea>
+      <button type="submit" class="btn-primary"><i class="fas fa-paper-plane"></i> Send Message</button>
+    </form>
+    <div class="contact-info">
+      <div class="info-item">
+        <div class="icn"><i class="fas fa-envelope"></i></div>
+        <div class="info-text"><h4>Email</h4><p>ilyas@adeege.gt.tc</p></div>
+      </div>
+      <div class="info-item">
+        <div class="icn"><i class="fas fa-map-marker-alt"></i></div>
+        <div class="info-text"><h4>Location</h4><p>Remote / Available Worldwide</p></div>
+      </div>
+      <div class="info-item">
+        <div class="icn"><i class="fas fa-clock"></i></div>
+        <div class="info-text"><h4>Availability</h4><p>Open for freelance & full-time</p></div>
+      </div>
+    </div>
+  </div>
+</section>
 
-        const themeToggle = $('#theme-toggle');
-        const hamburger = $('#hamburger');
-        const navLinks = $('#nav-links');
-        const backToTopBtn = $('#back-to-top');
-        const typingEl = $('#typing-text');
-        const skillsGrid = $('#skills-grid');
-        const projectsGrid = $('#projects-grid');
-        const timeline = $('#timeline');
-        const contactForm = $('#contact-form');
+<!-- FOOTER -->
+<footer>
+  <p>© 2026 Mr. Ilyas Abdi Ali. All rights reserved.</p>
+  <div class="social-links">
+    <a href="#"><i class="fab fa-github"></i></a>
+    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+    <a href="#"><i class="fab fa-twitter"></i></a>
+    <a href="#"><i class="fab fa-instagram"></i></a>
+    <a href="#"><i class="fab fa-dribbble"></i></a>
+  </div>
+</footer>
 
-        // ================================================================
-        // TOAST NOTIFICATION SYSTEM
-        // ================================================================
-        function showToast(message, type = 'info') {
-            const container = $('#toast-container');
-            const icons = { success: 'fa-check-circle', error: 'fa-times-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            toast.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i> ${message}`;
-            toast.addEventListener('click', () => {
-                toast.classList.add('toast-out');
-                setTimeout(() => toast.remove(), 350);
-            });
-            container.appendChild(toast);
-            setTimeout(() => {
-                if (toast.parentNode) {
-                    toast.classList.add('toast-out');
-                    setTimeout(() => toast.remove(), 350);
-                }
-            }, 4000);
-        }
+</div><!-- end mainSite -->
 
-        // ================================================================
-        // AUTH ERROR DISPLAY
-        // ================================================================
-        function showAuthError(msg) {
-            authError.textContent = msg;
-            authError.classList.add('show');
-        }
+<!-- BACK TO TOP -->
+<button id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  <i class="fas fa-arrow-up"></i>
+</button>
 
-        function clearAuthError() {
-            authError.textContent = '';
-            authError.classList.remove('show');
-        }
+<script>
+// ===== FIREBASE CONFIG (REPLACE WITH YOUR OWN) =====
+const firebaseConfig = {
+  apiKey: "AIzaSyBzgoI6WiZ-2cGvALjSzS1fHIeeEnUy-Ts",
+  authDomain: "my-awr-f12c1.firebaseapp.com",
+  projectId: "my-awr-f12c1",
+  storageBucket: "my-awr-f12c1.firebasestorage.app",
+  messagingSenderId: "566434636051",
+  appId: "1:566434636051:android:02ca7d09cdfbf9ef31bae6"
+};
 
-        function getFirebaseErrorMessage(code) {
-            const map = {
-                'auth/user-not-found': 'No account found with this email.',
-                'auth/wrong-password': 'Incorrect password.',
-                'auth/invalid-credential': 'Invalid email or password.',
-                'auth/email-already-in-use': 'An account with this email already exists.',
-                'auth/weak-password': 'Password must be at least 6 characters.',
-                'auth/invalid-email': 'Please enter a valid email address.',
-                'auth/too-many-requests': 'Too many attempts. Please try again later.',
-                'auth/network-request-failed': 'Network error. Check your connection.',
-                'auth/popup-closed-by-user': 'Sign-in cancelled.',
-                'auth/cancelled-popup-request': 'Sign-in cancelled.',
-            };
-            return map[code] || 'Something went wrong. Please try again.';
-        }
+import { initializeApp }
+from {
+'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+ 
+const auth = firebase.auth();
+    
+// ===== THEME =====
+function getPreferredTheme() {
+  const saved = localStorage.getItem('adeeg-theme');
+  if (saved) return saved;
+  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+}
+let currentTheme = getPreferredTheme();
+if (currentTheme === 'light') document.documentElement.classList.add('light');
 
-        // ================================================================
-        // SWITCH AUTH FORMS
-        // ================================================================
-        function switchAuthForm(formId) {
-            clearAuthError();
-            $$('.auth-form').forEach(f => f.classList.remove('active'));
-            $(`#${formId}`).classList.add('active');
-            authTabs.forEach(t => {
-                const tab = t.dataset.tab;
-                t.classList.toggle('active', (tab === 'login' && formId === 'login-form') || (tab === 'register' && formId === 'register-form'));
-            });
-        }
+function toggleTheme() {
+  currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  document.documentElement.classList.toggle('light', currentTheme === 'light');
+  localStorage.setItem('adeeg-theme', currentTheme);
+  updateThemeIcon();
+}
+function updateThemeIcon() {
+  const icon = document.querySelector('#themeToggle i');
+  if (icon) icon.className = currentTheme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+}
+updateThemeIcon();
 
-        forgotLink.addEventListener('click', () => {
-            clearAuthError();
-            $$('.auth-form').forEach(f => f.classList.remove('active'));
-            forgotForm.classList.add('active');
-        });
+// ===== LOADING =====
+setTimeout(() => {
+  document.getElementById('loadingScreen').classList.add('hidden');
+}, 800);
 
-        backToLogin.addEventListener('click', () => switchAuthForm('login-form'));
-        switchToLogin.addEventListener('click', () => switchAuthForm('login-form'));
+// ===== AUTH STATE =====
+let currentUser = null;
 
-        authTabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                const id = tab.dataset.tab === 'login' ? 'login-form' : 'register-form';
-                switchAuthForm(id);
-            });
-        });
+function showAuth() {
+  document.getElementById('authOverlay').classList.remove('hidden');
+  document.getElementById('mainSite').classList.remove('active');
+}
+function showMain() {
+  document.getElementById('authOverlay').classList.add('hidden');
+  document.getElementById('mainSite').classList.add('active');
+}
 
-        // ================================================================
-        // AUTH: EMAIL/PASSWORD LOGIN
-        // ================================================================
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            clearAuthError();
-            const email = $('#login-email').value.trim();
-            const password = $('#login-password').value;
-            loginBtn.disabled = true;
-            loginBtn.textContent = 'Signing in...';
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-                showToast('Welcome back!', 'success');
-            } catch (err) {
-                showAuthError(getFirebaseErrorMessage(err.code));
-                loginBtn.disabled = false;
-                loginBtn.textContent = 'Sign In';
-            }
-        });
+function updateUserUI(user) {
+  if (!user) return;
+  const name = user.displayName || user.email.split('@')[0];
+  const initials = name.split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase();
+  document.getElementById('avatarInitials').textContent = initials;
+  document.getElementById('dropdownName').textContent = name;
+  document.getElementById('dropdownEmail').textContent = user.email;
+}
 
-        // ================================================================
-        // AUTH: REGISTER
-        // ================================================================
-        registerForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            clearAuthError();
-            const name = $('#reg-name').value.trim();
-            const email = $('#reg-email').value.trim();
-            const password = $('#reg-password').value;
-            const confirm = $('#reg-confirm').value;
+firebase.auth().onAuthStateChanged(user => {
+  currentUser = user;
+  if (user) {
+    if (!user.emailVerified) {
+      // Allow access but show notification
+      notify('Please verify your email. Check your inbox.', 'info');
+    }
+    showMain();
+    updateUserUI(user);
+    initCounters();
+    animateSkills();
+    initScrollReveal();
+  } else {
+    showAuth();
+  }
+});
 
-            if (password !== confirm) {
-                showAuthError('Passwords do not match.');
-                return;
-            }
-            if (password.length < 6) {
-                showAuthError('Password must be at least 6 characters.');
-                return;
-            }
+// ===== AUTH TABS =====
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+  if (tab === 'login') document.getElementById('loginForm').classList.add('active');
+  else if (tab === 'register') document.getElementById('registerForm').classList.add('active');
+  else if (tab === 'forgot') document.getElementById('forgotForm').classList.add('active');
+  document.getElementById('loginError').textContent = '';
+  document.getElementById('regError').textContent = '';
+}
 
-            registerBtn.disabled = true;
-            registerBtn.textContent = 'Creating account...';
-            try {
-                const cred = await createUserWithEmailAndPassword(auth, email, password);
-                await updateProfile(cred.user, { displayName: name });
-                await sendEmailVerification(cred.user);
-                showToast('Account created! Please verify your email.', 'success');
-            } catch (err) {
-                showAuthError(getFirebaseErrorMessage(err.code));
-                registerBtn.disabled = false;
-                registerBtn.textContent = 'Create Account';
-            }
-        });
+function showForgot() {
+  switchAuthTab('forgot');
+}
 
-        // ================================================================
-        // AUTH: GOOGLE SIGN-IN
-        // ================================================================
-        async function handleGoogleSignIn() {
-            clearAuthError();
-            try {
-                await signInWithPopup(auth, googleProvider);
-                showToast('Signed in with Google!', 'success');
-            } catch (err) {
-                if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
-                    showAuthError(getFirebaseErrorMessage(err.code));
-                }
-            }
-        }
+// ===== LOGIN =====
+async function handleLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const btn = document.getElementById('loginBtn');
+  const err = document.getElementById('loginError');
+  err.textContent = '';
+  if (!email || !password) { err.textContent = 'Please fill in all fields.'; return; }
+  btn.disabled = true; btn.textContent = 'Signing in...';
+  try {
+    await firebase.auth().signInWithEmailAndPassword(email, password);
+  } catch (e) {
+    err.textContent = e.code === 'auth/invalid-credential' || e.code === 'auth/wrong-password' ? 'Invalid email or password.' :
+      e.code === 'auth/user-not-found' ? 'No account with that email.' :
+      e.code === 'auth/too-many-requests' ? 'Too many attempts. Try again later.' : e.message;
+  }
+  btn.disabled = false; btn.textContent = 'Sign In';
+}
 
-        googleLoginBtn.addEventListener('click', handleGoogleSignIn);
-        googleRegisterBtn.addEventListener('click', handleGoogleSignIn);
+// ===== REGISTER =====
+async function handleRegister() {
+  const name = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPassword').value;
+  const confirm = document.getElementById('regConfirm').value;
+  const btn = document.getElementById('regBtn');
+  const err = document.getElementById('regError');
+  err.textContent = '';
+  if (!name || !email || !password) { err.textContent = 'Please fill in all fields.'; return; }
+  if (password.length < 6) { err.textContent = 'Password must be at least 6 characters.'; return; }
+  if (password !== confirm) { err.textContent = 'Passwords do not match.'; return; }
+  btn.disabled = true; btn.textContent = 'Creating...';
+  try {
+    const cred = await firebase.auth().createUserWithEmailAndPassword(email, password);
+    await cred.user.updateProfile({ displayName: name });
+    await cred.user.sendEmailVerification();
+    notify('Account created! Please verify your email.', 'success');
+  } catch (e) {
+    err.textContent = e.code === 'auth/email-already-in-use' ? 'An account with this email exists.' :
+      e.code === 'auth/weak-password' ? 'Password should be at least 6 characters.' :
+      e.code === 'auth/invalid-email' ? 'Invalid email address.' : e.message;
+  }
+  btn.disabled = false; btn.textContent = 'Create Account';
+}
 
-        // ================================================================
-        // AUTH: FORGOT PASSWORD
-        // ================================================================
-        forgotForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            clearAuthError();
-            const email = $('#forgot-email').value.trim();
-            if (!email) { showAuthError('Enter your email address.'); return; }
-            forgotBtn.disabled = true;
-            forgotBtn.textContent = 'Sending...';
-            try {
-                await sendPasswordResetEmail(auth, email);
-                showToast('Password reset link sent! Check your inbox.', 'success');
-                switchAuthForm('login-form');
-                $('#forgot-email').value = '';
-            } catch (err) {
-                showAuthError(getFirebaseErrorMessage(err.code));
-            }
-            forgotBtn.disabled = false;
-            forgotBtn.textContent = 'Send Reset Link';
-        });
+// ===== GOOGLE LOGIN =====
+async function handleGoogleLogin() {
+  try {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    await firebase.auth().signInWithPopup(provider);
+    notify('Signed in with Google', 'success');
+  } catch (e) {
+    if (e.code !== 'auth/popup-closed-by-user') notify(e.message, 'error');
+  }
+}
 
-        // ================================================================
-        // AUTH STATE LISTENER — PROTECT PORTFOLIO
-        // ================================================================
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                // User is signed in → show portfolio
-                authPage.classList.add('hidden');
-                appEl.classList.add('visible');
-                const displayName = user.displayName || user.email.split('@')[0] || 'User';
-                const photoURL = user.photoURL;
-                navUsername.textContent = displayName;
-                // Avatar
-                if (photoURL) {
-                    navAvatar.innerHTML = `<img src="${photoURL}" alt="${displayName}" />`;
-                } else {
-                    const initials = displayName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'U';
-                    navInitials.textContent = initials;
-                    navAvatar.innerHTML = `<span id="nav-initials">${initials}</span>`;
-                }
-                loadingScreen.classList.add('hidden');
-                // Init portfolio features after auth
-                setTimeout(initPortfolio, 200);
-            } else {
-                // Not signed in → show auth page
-                appEl.classList.remove('visible');
-                authPage.classList.remove('hidden');
-                loadingScreen.classList.add('hidden');
-            }
-        });
+// ===== FORGOT PASSWORD =====
+async function handleForgotPassword() {
+  const email = document.getElementById('forgotEmail').value.trim();
+  const btn = document.getElementById('forgotBtn');
+  const err = document.getElementById('forgotError');
+  const success = document.getElementById('forgotSuccess');
+  err.textContent = ''; success.textContent = '';
+  if (!email) { err.textContent = 'Please enter your email.'; return; }
+  btn.disabled = true; btn.textContent = 'Sending...';
+  try {
+    await firebase.auth().sendPasswordResetEmail(email);
+    success.textContent = 'Check your inbox for a reset link.';
+    notify('Reset link sent!', 'success');
+  } catch (e) {
+    err.textContent = e.code === 'auth/user-not-found' ? 'No account with that email.' : 'Could not send reset email.';
+  }
+  btn.disabled = false; btn.textContent =
+btn.disabled = false; btn.textContent = 'Send Reset Link';
+}
 
-        // ================================================================
-        // LOGOUT
-        // ================================================================
-        logoutBtn.addEventListener('click', async () => {
-            try {
-                await signOut(auth);
-                showToast('Signed out successfully.', 'info');
-            } catch (err) {
-                showToast('Error signing out.', 'error');
-            }
-        });
+// ===== LOGOUT =====
+async function handleLogout() {
+  await firebase.auth().signOut();
+  notify('Signed out', 'info');
+}
 
-        // ================================================================
-        // THEME TOGGLE (Dark / Light Mode)
-        // ================================================================
-        function setTheme(theme) {
-            document.documentElement.setAttribute('data-theme', theme);
-            localStorage.setItem('portfolio-theme', theme);
-            const icon = themeToggle.querySelector('i');
-            icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-        }
+// ===== USER DROPDOWN =====
+function toggleDropdown() {
+  document.getElementById('userDropdown').classList.toggle('show');
+}
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#userAvatar') && !e.target.closest('.user-dropdown')) {
+    document.getElementById('userDropdown').classList.remove('show');
+  }
+});
 
-        function toggleTheme() {
-            const current = document.documentElement.getAttribute('data-theme');
-            setTheme(current === 'dark' ? 'light' : 'dark');
-        }
+// ===== MOBILE NAV =====
+function toggleMobileNav() {
+  document.getElementById('navLinks').classList.toggle('open');
+}
 
-        // Load saved theme
-        const savedTheme = localStorage.getItem('portfolio-theme') || 'light';
-        setTheme(savedTheme);
-        themeToggle.addEventListener('click', toggleTheme);
+// ===== TYPING TEXT =====
+const phrases = [
+  'Passionate Web Developer & Designer crafting clean, performant, and beautiful digital experiences.',
+  'Turning ideas into pixel-perfect reality.'
+];
+let phraseIdx = 0, charIdx = 0, isDeleting = false;
+function typeEffect() {
+  const el = document.getElementById('typedText');
+  const current = phrases[phraseIdx];
+  if (!isDeleting) {
+    el.textContent = current.substring(0, charIdx + 1);
+    charIdx++;
+    if (charIdx === current.length) { isDeleting = true; setTimeout(typeEffect, 2000); return; }
+  } else {
+    el.textContent = current.substring(0, charIdx - 1);
+    charIdx--;
+    if (charIdx === 0) { isDeleting = false; phraseIdx = (phraseIdx + 1) % phrases.length; }
+  }
+  setTimeout(typeEffect, isDeleting ? 30 : 60);
+}
+setTimeout(typeEffect, 1200);
 
-        // ================================================================
-        // MOBILE HAMBURGER MENU
-        // ================================================================
-        hamburger.addEventListener('click', () => {
-            hamburger.classList.toggle('active');
-            navLinks.classList.toggle('open');
-        });
-        navLinks.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => {
-                hamburger.classList.remove('active');
-                navLinks.classList.remove('open');
-            });
-        });
+// ===== ANIMATED COUNTERS =====
+function initCounters() {
+  document.querySelectorAll('.counter').forEach(counter => {
+    const target = parseInt(counter.dataset.target);
+    let current = 0;
+    const increment = Math.ceil(target / 60);
+    const update = () => {
+      current += increment;
+      if (current >= target) { counter.textContent = target; return; }
+      counter.textContent = current;
+      requestAnimationFrame(update);
+    };
+    update();
+  });
+}
 
-        // ================================================================
-        // BACK TO TOP BUTTON
-        // ================================================================
-        window.addEventListener('scroll', () => {
-            backToTopBtn.classList.toggle('visible', window.scrollY > 500);
-        });
-        backToTopBtn.addEventListener('click', () => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
+// ===== SKILL BARS =====
+function animateSkills() {
+  document.querySelectorAll('.skill-bar-fill').forEach(bar => {
+    bar.style.width = bar.dataset.width + '%';
+  });
+}
 
-        // ================================================================
-        // PORTFOLIO DATA
-        // ================================================================
-        const skillsData = [
-            { name: 'HTML / CSS', percent: 95 },
-            { name: 'JavaScript', percent: 90 },
-            { name: 'React / Next.js', percent: 85 },
-            { name: 'Node.js', percent: 80 },
-            { name: 'UI/UX Design', percent: 88 },
-            { name: 'Git / DevOps', percent: 75 },
-        ];
+// ===== SCROLL REVEAL =====
+function initScrollReveal() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        // Animate skill bars when skills section is visible
+        if (entry.target.closest('#skills')) animateSkills();
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+}
+setTimeout(initScrollReveal, 1000);
 
-        const projectsData = [
-            { title: 'FinTech Dashboard', tags: ['React', 'Node.js', 'D3.js'], img: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80' },
-            { title: 'E-Commerce Platform', tags: ['Next.js', 'Stripe', 'Sanity'], img: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80' },
-            { title: 'Agency Portfolio', tags: ['HTML', 'CSS', 'GSAP'], img: 'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?w=600&q=80' },
-            { title: 'SaaS Landing Page', tags: ['React', 'Framer Motion'], img: 'https://images.unsplash.com/photo-1559028012-481c04fa702d?w=600&q=80' },
-            { title: 'Brand Identity System', tags: ['Figma', 'Illustrator', 'Webflow'], img: 'https://images.unsplash.com/photo-1522542550221-31fd19575a2d?w=600&q=80' },
-            { title: 'Mobile App Design', tags: ['Figma', 'Flutter'], img: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=600&q=80' },
-        ];
+// ===== BACK TO TOP =====
+window.addEventListener('scroll', () => {
+  document.getElementById('backToTop').classList.toggle('show', window.scrollY > 500);
+});
 
-        const experienceData = [
-            { date: '2024 — Present', title: 'Senior Web Developer', company: 'Freelance / Self-Employed', desc: 'Leading full-stack web development projects for diverse clients. Building modern, scalable applications with React, Node.js, and cloud infrastructure.' },
-            { date: '2022 — 2024', title: 'Full Stack Developer', company: 'Digital Agency', desc: 'Developed and maintained 20+ client websites. Collaborated with design teams to deliver pixel-perfect responsive layouts and optimized performance.' },
-            { date: '2020 — 2022', title: 'Frontend Developer', company: 'Tech Startup', desc: 'Built interactive user interfaces with React and TypeScript. Implemented animations, state management, and integrated RESTful APIs.' },
-            { date: '2019 — 2020', title: 'Junior Web Developer', company: 'Web Studio', desc: 'Started my professional journey building responsive WordPress sites and custom HTML/CSS landing pages. Learned the foundations of modern web development.' },
-        ];
+// ===== NOTIFICATIONS =====
+function notify(message, type = 'info') {
+  const container = document.getElementById('notifContainer');
+  const el = document.createElement('div');
+  el.className = `notification ${type}`;
+  const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', info: 'fa-info-circle' };
+  el.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i> ${message}`;
+  container.appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(2rem)'; el.style.transition = '0.4s'; setTimeout(() => el.remove(), 400); }, 3500);
+}
 
-        // ================================================================
-        // RENDER PORTFOLIO CONTENT
-        // ================================================================
-        function renderSkills() {
-            skillsGrid.innerHTML = skillsData.map(s => `
-                        <div class="skill-card glass reveal">
-                            <div class="skill-header">
-                                <span class="skill-name">${s.name}</span>
-                                <span class="skill-percent">${s.percent}%</span>
-                            </div>
-                            <div class="skill-bar">
-                                <div class="skill-fill" data-width="${s.percent}"></div>
-                            </div>
-                        </div>
-                    `).join('');
-        }
+// ===== CONTACT FORM =====
+function handleContactForm(e) {
+  e.preventDefault();
+  notify('Message sent — thanks for reaching out!', 'success');
+  e.target.reset();
+}
 
-        function renderProjects() {
-            projectsGrid.innerHTML = projectsData.map(p => `
-                        <div class="project-card reveal">
-                            <img class="project-img" src="${p.img}" alt="${p.title}" loading="lazy" />
-                            <div class="project-info">
-                                <h4>${p.title}</h4>
-                                <div class="project-tags">
-                                    ${p.tags.map(t => `<span>${t}</span>`).join('')}
-                                </div>
-                            </div>
-                        </div>
-                    `).join('');
-        }
-
-        function renderTimeline() {
-            timeline.innerHTML = experienceData.map(e => `
-                        <div class="timeline-item reveal">
-                            <div class="timeline-dot"></div>
-                            <div class="timeline-content glass">
-                                <div class="timeline-date">${e.date}</div>
-                                <h4>${e.title}</h4>
-                                <div class="timeline-company">${e.company}</div>
-                                <p>${e.desc}</p>
-                            </div>
-                        </div>
-                    `).join('');
-        }
-
-        // ================================================================
-        // TYPING EFFECT
-        // ================================================================
-        function startTyping() {
-            const words = ['Web Developer', 'UI/UX Designer', 'Problem Solver', 'Tech Enthusiast'];
-            let wordIdx = 0;
-            let charIdx = 0;
-            let isDeleting = false;
-            let speed = 100;
-
-            function type() {
-                const current = words[wordIdx];
-                if (isDeleting) {
-                    typingEl.textContent = current.substring(0, charIdx--);
-                    speed = 40;
-                } else {
-                    typingEl.textContent = current.substring(0, charIdx++);
-                    speed = 100;
-                }
-
-                if (!isDeleting && charIdx === current.length) {
-                    speed = 1800;
-                    isDeleting = true;
-                } else if (isDeleting && charIdx === 0) {
-                    isDeleting = false;
-                    wordIdx = (wordIdx + 1) % words.length;
-                    speed = 500;
-                }
-                setTimeout(type, speed);
-            }
-            type();
-        }
-
-        // ================================================================
-        // ANIMATED COUNTERS (Intersection Observer)
-        // ================================================================
-        function animateCounters() {
-            const counters = $$('.stat-number');
-            counters.forEach(counter => {
-                const target = parseInt(counter.dataset.target);
-                const increment = Math.ceil(target / 40);
-                let current = 0;
-                const update = () => {
-                    current += increment;
-                    if (current >= target) {
-                        counter.textContent = target + '+';
-                        return;
-                    }
-                    counter.textContent = current;
-                    requestAnimationFrame(update);
-                };
-                update();
-            });
-        }
-
-        // ================================================================
-        // SKILLS ANIMATION (animate skill bars on scroll)
-        // ================================================================
-        function animateSkills() {
-            const fills = $$('.skill-fill');
-            fills.forEach(fill => {
-                const width = fill.dataset.width;
-                fill.style.width = width + '%';
-            });
-        }
-
-        // ================================================================
-        // SCROLL REVEAL (Intersection Observer)
-        // ================================================================
-        function initScrollReveal() {
-            const reveals = $$('.reveal');
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                        // If this reveal contains skill-fill children, animate them
-                        if (entry.target.querySelector('.skill-fill')) {
-                            setTimeout(() => {
-                                entry.target.querySelectorAll('.skill-fill').forEach(f => {
-                                    f.style.width = f.dataset.width + '%';
-                                });
-                            }, 200);
-                        }
-                        // If this is a stat counter, trigger counting
-                        if (entry.target.querySelector('.stat-number') && !entry.target.dataset.counted) {
-                            entry.target.dataset.counted = 'true';
-                            animateCountersInView(entry.target);
-                        }
-                    }
-                });
-            }, { threshold: 0.15 });
-
-            reveals.forEach(el => observer.observe(el));
-        }
-
-        function animateCountersInView(container) {
-            const counters = container.querySelectorAll('.stat-number');
-            counters.forEach(counter => {
-                const target = parseInt(counter.dataset.target);
-                const increment = Math.ceil(target / 40);
-                let current = 0;
-                const update = () => {
-                    current += increment;
-                    if (current >= target) {
-                        counter.textContent = target + '+';
-                        return;
-                    }
-                    counter.textContent = current;
-                    requestAnimationFrame(update);
-                };
-                update();
-            });
-        }
-
-        // ================================================================
-        // CONTACT FORM HANDLER
-        // ================================================================
-        contactForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            showToast('Message sent! I\'ll get back to you soon.', 'success');
-            contactForm.reset();
-        });
-
-        // ================================================================
-        // INIT ALL PORTFOLIO FEATURES
-        // ================================================================
-        function initPortfolio() {
-            renderSkills();
-            renderProjects();
-            renderTimeline();
-            startTyping();
-            initScrollReveal();
-
-            // Reset skill fills for re-animation
-            document.querySelectorAll('.skill-fill').forEach(f => f.style.width = '0%');
-        }
-
-        // ================================================================
-        // NAVBAR ACTIVE LINK ON SCROLL
-        // ================================================================
-        window.addEventListener('scroll', () => {
-            const sections = $$('section[id], .hero');
-            let current = '';
-            sections.forEach(s => {
-                const top = s.offsetTop - 120;
-                if (window.scrollY >= top) {
-                    current = s.getAttribute('id') || 'home';
-                }
-            });
-            navLinks.querySelectorAll('a').forEach(a => {
-                a.classList.toggle('active', a.getAttribute('href') === `#${current}`);
-            });
-        });
-
-        console.log('🔥 HackerAI — Firebase Auth Portfolio loaded');
-        console.log('📧 Replace firebaseConfig with your own Firebase project config.');
-    </script>
-</body>
-</html>
+// ===== NAV ACTIVE LINK =====
+window.addEventListener('scroll', () => {
+  const sections = document.querySelectorAll('section');
+  const links = document.querySelectorAll('.nav-links a');
+  let current = '';
+  sections.forEach(s => {
+    if (window.scrollY >= s.offsetTop - 200) current = s.id;
+  });
+  links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + current));
+});
