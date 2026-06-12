@@ -862,22 +862,28 @@
   <i class="fas fa-arrow-up"></i>
 </button>
 
-<script>
+<script type="module">
 // ===== FIREBASE CONFIG (REPLACE WITH YOUR OWN) =====
 const firebaseConfig = {
   apiKey: "AIzaSyBzgoI6WiZ-2cGvALjSzS1fHIeeEnUy-Ts",
   authDomain: "my-awr-f12c1.firebaseapp.com",
   projectId: "my-awr-f12c1",
-  storageBucket: "my-awr-f12c1.firebasestorage.app",
+  storageBucket: "my-awr-f12c1.appspot.com",
   messagingSenderId: "566434636051",
   appId: "1:566434636051:android:02ca7d09cdfbf9ef31bae6"
 };
 
-import { initializeApp }
-from {
-'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
  
-const auth = firebase.auth();
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
     
 // ===== THEME =====
 function getPreferredTheme() {
