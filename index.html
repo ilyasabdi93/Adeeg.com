@@ -939,7 +939,7 @@ function updateUserUI(user) {
   document.getElementById('dropdownEmail').textContent = user.email;
 }
 
-firebase.auth().onAuthStateChanged(user => {
+onAuthStateChanged(auth, (user) => {
   currentUser = user;
   if (user) {
     if (!user.emailVerified) {
@@ -981,7 +981,7 @@ async function handleLogin() {
   if (!email || !password) { err.textContent = 'Please fill in all fields.'; return; }
   btn.disabled = true; btn.textContent = 'Signing in...';
   try {
-    await firebase.auth().signInWithEmailAndPassword(email, password);
+    await signInWithEmailAndPassword(auth, email, password);
   } catch (e) {
     err.textContent = e.code === 'auth/invalid-credential' || e.code === 'auth/wrong-password' ? 'Invalid email or password.' :
       e.code === 'auth/user-not-found' ? 'No account with that email.' :
