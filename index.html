@@ -943,5 +943,18 @@
   <source src="/movie.mp4" type="video/mp4">
   Your browser does not support the video tag.
 </video>
+  <script>
+const themeToggle = document.getElementById("theme-toggle");
+
+themeToggle.addEventListener("click", () => {
+  document.body.classList.toggle("dark-mode");
+
+  if (document.body.classList.contains("dark-mode")) {
+    themeToggle.textContent = "☀️";
+  } else {
+    themeToggle.textContent = "🌙";
+  }
+});
+</script>
 </body>
 </html>
