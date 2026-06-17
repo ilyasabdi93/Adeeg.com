@@ -572,8 +572,20 @@
       .hero-actions { flex-direction: column; }
       .hero-actions .btn-primary,
       .hero-actions .btn-outline,
-      .hero-actions .btn-whatsapp { width: 100%; justify-content: center; }
+      .hero-actions .btn-whatsapp { width: 100%; justify-content: center; {
     }
+      .dark-mode {
+    background: #121212;
+    color: white;
+}
+
+.dark-mode .navbar {
+    background: #1e1e1e;
+}
+
+.dark-mode a {
+    color: white;
+}
   </style>
 </head>
 <body>
@@ -590,6 +602,7 @@
       <li><a href="#portfolio">Portfolio</a></li>
       <li><a href="#contact">Contact Me</a></li>
     </ul>
+    <button id="theme-toggle">🌙</button>
   </nav>
 
   <!-- ===== HERO SPLIT ===== -->
