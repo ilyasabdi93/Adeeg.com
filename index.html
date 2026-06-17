@@ -586,7 +586,39 @@
 body.dark-mode .navbar
     color: white;
 }
+    body.dark-mode .navbar {
+  color: white;
+}
+
+/* === KU DAR HALKAN CSS-KA CUSUB === */
+body.dark-mode section,
+body.dark-mode .hero,
+body.dark-mode .hero-left,
+body.dark-mode .hero-right {
+  background-color: #121212 !important;
+  color: #ffffff !important;
+}
+
+body.dark-mode a {
+  color: #4ea8ff !important;
+}
+
+body.dark-mode .btn-primary,
+body.dark-mode .btn-outline,
+body.dark-mode .btn-whatsapp {
+  border-color: #ffffff !important;
+  color: #ffffff !important;
+}
+
+body.dark-mode p,
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode span {
+  color: #ffffff !important;
+}
   </style>
+  
 </head>
 <body>
 
@@ -944,4 +976,9 @@ body.dark-mode .navbar
   Your browser does not support the video tag.
 </video>
 </body>
+  <script>
+document.getElementById('theme-toggle').addEventListener('click', () => {
+  document.body.classList.toggle('dark-mode');
+});
+</script>
 </html>
