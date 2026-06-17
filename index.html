@@ -618,7 +618,23 @@ body.dark-mode span {
   color: #ffffff !important;
 }
   </style>
-  
+  .btn-buy-cv {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  margin-top: 15px;
+}
+.btn-buy-cv:hover {
+  transform: translateY(-2px);
+}
+body.dark-mode .btn-buy-cv {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
 </head>
 <body>
 
@@ -657,6 +673,7 @@ body.dark-mode span {
           <a href="Ilyas_CV.pdf" class="btn-outline" download>
             <i class="fas fa-download"></i> Download CV
           </a>
+          <button id="buy-cv-btn" class="btn-buy-cv">💳 Buy CV - $5</button>
           <a href="https://wa.me/252682390000" target="_blank" rel="noopener" class="btn-whatsapp">
             <i class="fab fa-whatsapp"></i> WhatsApp
           </a>
@@ -979,6 +996,22 @@ body.dark-mode span {
   <script>
 document.getElementById('theme-toggle').addEventListener('click', () => {
   document.body.classList.toggle('dark-mode');
+});
+</script>
+  <script src="https://js.stripe.com/v3/"></script>
+<script>
+const stripe = Stripe('pk_test_51TjRhXLbf9NDFZBsB0l9LODknUOowF237es2m09Vz5sonYUStjpM7Ik32WBjU7UezwBOyDnO7zZZZbSwmIjos4OZ00g48ww4VK');
+
+document.getElementById('buy-cv-btn').addEventListener('click', async () => {
+  const response = await fetch('/api/create-checkout', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ amount: 500 })
+  });
+  const data = await response.json();
+  if (data.sessionId) {
+    stripe.redirectToCheckout({ sessionId: data.sessionId });
+  }
 });
 </script>
 </html>
